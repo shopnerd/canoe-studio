@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Canoe Studio — parametric concrete canoe design</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script type="importmap">{ "imports": { "three": "./vendor/three.module.js" } }</script>
+</head>
+<body>
+<header class="bar">
+  <div class="brand">
+    <svg viewBox="0 0 40 16" aria-hidden="true"><path d="M1 4 C 10 15, 30 15, 39 4 L 39 3 C 28 7, 12 7, 1 3 Z" /></svg>
+    <span>Canoe&nbsp;Studio</span>
+  </div>
+  <input id="designName" class="name" value="Untitled canoe" aria-label="Design name" spellcheck="false">
+  <div class="bar-actions">
+    <button id="btnUndo" title="Undo (Ctrl+Z)">Undo</button>
+    <button id="btnSave" title="Download design as JSON">Save</button>
+    <label class="btn" title="Open a saved design JSON">Open<input id="fileOpen" type="file" accept=".json,application/json" hidden></label>
+    <button id="btnLink" title="Copy a link with every parameter in it">Copy link</button>
+    <button id="btnReset" title="Back to the values in the Grasshopper file">Reset</button>
+    <button id="btnAbout" class="ghost">About</button>
+  </div>
+</header>
+
+<main class="layout">
+  <aside class="params" id="params" aria-label="Design parameters"></aside>
+
+  <section class="view">
+    <div class="viewport" id="viewport">
+      <div class="view-tools">
+        <div class="seg" id="viewPresets">
+          <button data-view="iso" class="on">3D</button><button data-view="side">Side</button><button data-view="top">Top</button><button data-view="front">Bow</button>
+        </div>
+        <div class="toggles" id="layerToggles">
+          <label><input type="checkbox" data-layer="hull" checked>Hull</label>
+          <label><input type="checkbox" data-layer="stations" checked>Stations</label>
+          <label><input type="checkbox" data-layer="curves">Control curves</label>
+          <label><input type="checkbox" data-layer="shell">Concrete shell</label>
+          <label><input type="checkbox" data-layer="water" checked>Waterline</label>
+          <label><input type="checkbox" data-layer="mold">Mold blocks</label>
+        </div>
+      </div>
+      <div class="status" id="status"><span class="dot"></span><span id="statusText">Starting geometry engine…</span></div>
+      <div class="warnings" id="warnings"></div>
+      <div class="legend" id="legend"></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <nav class="tabs" role="tablist">
+      <button role="tab" data-tab="curves" class="on">Curves</button>
+      <button role="tab" data-tab="analysis">Analysis</button>
+      <button role="tab" data-tab="rules">Rules 2027</button>
+      <button role="tab" data-tab="build">Build &amp; export</button>
+    </nav>
+
+    <div class="tab on" data-tab="curves">
+      <div class="panel-head">
+        <p>Drag the orange handles. Each curve must stay inside its box — the same check the Grasshopper script runs.</p>
+        <label class="inline">Vertical scale
+          <select id="vexag"><option value="1">1×</option><option value="2" selected>2×</option><option value="3">3×</option></select>
+        </label>
+      </div>
+      <figure class="editor" id="edSection"><figcaption>Cross section <small>midship · looking forward</small></figcaption><svg></svg></figure>
+      <figure class="editor" id="edProfile"><figcaption>Profile <small>bow half · keel, stem &amp; sheer</small></figcaption><svg></svg></figure>
+      <figure class="editor" id="edPlan"><figcaption>Plan <small>bow half · gunwale from above</small></figcaption><svg></svg></figure>
+      <figure class="editor" id="edLines"><figcaption>Station sections <small>body plan · all stations</small></figcaption><svg></svg></figure>
+    </div>
+
+    <div class="tab" data-tab="analysis">
+      <div class="panel-head">
+        <p>Fresh water, upright unless noted. Updates about a second after you stop dragging.</p>
+        <button id="btnBaseline" class="small">Pin as baseline</button>
+      </div>
+      <div id="analysis"><p class="muted">Waiting for the first build…</p></div>
+    </div>
+
+    <div class="tab" data-tab="rules">
+      <div id="rules"><p class="muted">Waiting for the first build…</p></div>
+    </div>
+
+    <div class="tab" data-tab="build">
+      <div id="build"><p class="muted">Waiting for the first build…</p></div>
+    </div>
+  </section>
+</main>
+
+<dialog id="about">
+  <h2>Canoe Studio</h2>
+  <p>A browser version of <code>canoe_script_012226.gh</code>, the Grasshopper definition for parametrically designing the concrete canoe. Same parameters, same construction:</p>
+  <ol>
+    <li><b>Curve generation.</b> Four control curves — midship cross section, bow/keel profile, plan (gunwale) and sheer (top rocker) — each interpolated through 3–5 points you place with setbacks, and validated against its bounding box.</li>
+    <li><b>Canoe lofting.</b> Stations from midship to the forefoot tween the cross section into the stem, sit on the keel rocker, swing from 0° to 90° about the keel, and scale so their width at the gunwale matches the plan curve. The loft is mirrored to all four quadrants.</li>
+    <li><b>Final shaping.</b> Trim to the sheer line, optional stern chop, and a concrete shell at the wall thickness.</li>
+    <li><b>Mold blocks.</b> A block array trimmed flat at depth + floor, with the canoe cut out — ready to print or mill.</li>
+  </ol>
+  <p>The <b>Rules 2027</b> tab checks the design against the 2026–27 ASCE Concrete Canoe RFP (issued Sept 8, 2026): hull thickness, four-paddler freeboard for the names, flotation test and foam zones, concrete unit weight, reinforcement, and the 3-person structural load case.</p>
+  <p>Added beyond the script: hydrostatics (draft, freeboard, form coefficients, metacentric height), a righting-arm curve, swamp flotation check, friction drag, section templates, offsets table and STL export.</p>
+  <p class="muted">Analysis is an early-design estimate — verify with a float test. Units are inches and pounds. Geometry kernel: Manifold (Apache-2.0). Viewer: three.js (MIT).</p>
+  <form method="dialog"><button>Close</button></form>
+</dialog>
+
+<div class="toast" id="toast" role="status"></div>
+<script type="module" src="app.js"></script>
+</body>
+</html>

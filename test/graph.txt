@@ -1,0 +1,1152 @@
+#0 GROUP "cross section curve controls" members=4
+#1 GROUP "cross section curve" members=39
+#2 GROUP "top curve" members=44
+#3 GROUP "forward curve controls" members=4
+#4 GROUP "forward curve" members=63
+#5 Number Slider "height"
+   extra {"Slider": {"Digits": 3, "GripDisplay": 1, "Interval": 0, "Max": 24.0, "Min": 0.0, "SnapCount": 0, "Value": 18.0}, "sub": []}
+#6 Number Slider "length"
+   extra {"Slider": {"Digits": 3, "GripDisplay": 1, "Interval": 0, "Max": 300.0, "Min": 0.0, "SnapCount": 0, "Value": 210.0}, "sub": []}
+#7 Number Slider "width"
+   extra {"Slider": {"Digits": 3, "GripDisplay": 1, "Interval": 0, "Max": 36.0, "Min": 0.0, "SnapCount": 0, "Value": 30.0}, "sub": []}
+#8 Center Box "Box"
+   in B <= #9 Unit Z(Z).V
+   in X <= #12 Division(A/B).R data=[{"number": 1.0}]
+   in Y <= #11 Division(A/B).R data=[{"number": 1.0}]
+   in Z <= #10 Division(A/B).R data=[{"number": 1.0}]
+#9 Unit Z "Z"
+   in F <= #10 Division(A/B).R data=[{"number": 1.0}]
+#10 Division "A/B"
+   in A <= #5 Number Slider(height)
+   in B data=[{"TypeName": "Grasshopper.Kernel.Types.GH_Integer", "number": 2}]
+#11 Division "A/B"
+   in A <= #7 Number Slider(width)
+   in B data=[{"TypeName": "Grasshopper.Kernel.Types.GH_Integer", "number": 2}]
+#12 Division "A/B"
+   in A <= #6 Number Slider(length)
+   in B data=[{"TypeName": "Grasshopper.Kernel.Types.GH_Integer", "number": 2}]
+#13 Rectangle 2Pt "Rec 2Pt"
+   in P <= #14 YZ Plane(YZ).P data=[{"plane": [0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0]}]
+   in A <= #16 Unit Y(Y).V data=[{"Coordinate": [0.0, 0.0, 0.0]}]
+   in B <= #15 Unit Z(Z).V
+   in R data=[{"number": 0.0}]
+#14 YZ Plane "YZ"
+   in O data=[{"Coordinate": [0.0, 0.0, 0.0]}]
+#15 Unit Z "Z"
+   in F <= #5 Number Slider(height) data=[{"number": 1.0}]
+#16 Unit Y "Y"
+   in F <= #11 Division(A/B).R data=[{"number": 1.0}]
+#17 Rectangle 2Pt "Rec 2Pt"
+   in P <= #18 XZ Plane(XZ).P data=[{"plane": [0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0]}]
+   in A <= #20 Unit X(X).V data=[{"Coordinate": [0.0, 0.0, 0.0]}]
+   in B <= #19 Unit Z(Z).V
+   in R data=[{"number": 0.0}]
+#18 XZ Plane "XZ"
+   in O data=[{"Coordinate": [0.0, 0.0, 0.0]}]
+#19 Unit Z "Z"
+   in F <= #5 Number Slider(height) data=[{"number": 1.0}] {"WireDisplay": 2}
+#20 Unit X "X"
+   in F <= #12 Division(A/B).R data=[{"number": 1.0}] {"WireDisplay": 2}
+#21 Number Slider "midpoint setback X"
+   extra {"Slider": {"Digits": 3, "GripDisplay": 1, "Interval": 0, "Max": 100.0, "Min": 0.0, "SnapCount": 0, "Value": 4.736}, "sub": []}
+#22 Number Slider "bottom setback"
+   extra {"Slider": {"Digits": 3, "GripDisplay": 1, "Interval": 0, "Max": 20.0, "Min": 0.0, "SnapCount": 0, "Value": 12.0}, "sub": []}
+#23 GROUP "forward curve controls" members=1
+#24 Deconstruct Brep "DeBrep"
+   in B <= #17 Rectangle 2Pt(Rec 2Pt).R
+#25 List Item "Item" {"BaseOutputIndex": 0}
+   in L <= #27 Sort List(Sort).A
+   in i data=[{"number": 0}]
+   in W data=[{"boolean": true}]
+#26 Deconstruct "pDecon"
+   in P <= #24 Deconstruct Brep(DeBrep).V
+#27 Sort List "Sort"
+   in K <= #28 Deconstruct(pDecon).X
+   in A <= #30 Dispatch(Dispatch).A
+#28 Deconstruct "pDecon"
+   in P <= #30 Dispatch(Dispatch).A
+#29 Equality "Equals"
+   in A <= #26 Deconstruct(pDecon).X
+   in B data=[{"number": 0.0}]
+#30 Dispatch "Dispatch"
+   in L <= #24 Deconstruct Brep(DeBrep).V {"Access": 1}
+   in P <= #29 Equality(Equals).≠ data=[{"boolean": true}, {"boolean": false}] {"Access": 1}
+#31 Move "Move"
+   in G <= #25 List Item(Item).i
+   in T <= #189 Construct Point(Pt).Pt data=[{"vector": [0.0, 0.0, 10.0]}]
+#32 Negative "Neg"
+   in x <= #22 Number Slider(bottom setback)
+#33 Line "Ln"
+   in A <= #25 List Item(Item).i
+   in B <= #35 List Item(Item).i
+#34 Reverse List "Rev"
+   in L <= #27 Sort List(Sort).A {"Access": 1}
+#35 List Item "Item" {"BaseOutputIndex": 0}
+   in L <= #34 Reverse List(Rev).L
+   in i data=[{"number": 0}]
+   in W data=[{"boolean": true}]
+#36 Curve Middle "MidPt"
+   in C <= #33 Line(Ln).L
+#37 Negative "Neg"
+   in x <= #21 Number Slider(midpoint setback X)
+#38 Move "Move"
+   in G <= #36 Curve Middle(MidPt).M
+   in T <= #40 Construct Point(Pt).Pt data=[{"vector": [0.0, 0.0, 10.0]}]
+#39 Number Slider "midpoint setback Z"
+   extra {"Slider": {"Digits": 3, "GripDisplay": 1, "Interval": 0, "Max": 10.0, "Min": -10.0, "SnapCount": 0, "Value": 4.37}, "sub": []}
+#40 Construct Point "Pt"
+   in X <= #37 Negative(Neg).y data=[{"number": 0.0}]
+   in Y data=[{"number": 0.0}]
+   in Z <= #41 Negative(Neg).y data=[{"number": 0.0}]
+#41 Negative "Neg"
+   in x <= #39 Number Slider(midpoint setback Z)
+#42 Point In Curve "InCurve"
+   in P <= #43 Divide Curve(Divide).P
+   in C <= #17 Rectangle 2Pt(Rec 2Pt).R
+#43 Divide Curve "Divide"
+   in C <= #428 Interpolate (t)(IntCrv(t)).C
+   in N data=[{"number": 50}]
+   in K data=[{"boolean": false}]
+#44 Stream Filter "Filter"
+   in G <= #47 Equality(Equals).= data=[{"number": 0}]
+   in 0 <= #45 Null Placeholder(Null).N
+   in 1 <= #429 Split with Breps(Split).C
+#45 Null Placeholder "Null"
+#46 Member Index "MIndex"
+   in S <= #42 Point In Curve(InCurve).R {"Access": 1}
+   in M data=[{"TypeName": "Grasshopper.Kernel.Types.GH_Integer", "number": 0}]
+#47 Equality "Equals"
+   in A <= #46 Member Index(MIndex).N
+   in B data=[{"number": 0.0}]
+#48 GROUP "validation" members=6
+#49 Geometry "forward"
+   <= #191 List Item(Item).i
+#50 Geometry "bottom"
+   <= #190 List Item(Item).i
+#51 Deconstruct Brep "DeBrep"
+   in B <= #13 Rectangle 2Pt(Rec 2Pt).R
+#52 List Item "Item" {"BaseOutputIndex": 0}
+   in L <= #54 Sort List(Sort).A
+   in i data=[{"number": 0}]
+   in W data=[{"boolean": true}]
+#53 Deconstruct "pDecon"
+   in P <= #51 Deconstruct Brep(DeBrep).V
+#54 Sort List "Sort"
+   in K <= #55 Deconstruct(pDecon).X
+   in A <= #57 Dispatch(Dispatch).A
+#55 Deconstruct "pDecon"
+   in P <= #57 Dispatch(Dispatch).A
+#56 Equality "Equals"
+   in A <= #53 Deconstruct(pDecon).Y
+   in B data=[{"number": 0.0}]
+#57 Dispatch "Dispatch"
+   in L <= #51 Deconstruct Brep(DeBrep).V {"Access": 1}
+   in P <= #56 Equality(Equals).≠ data=[{"boolean": true}, {"boolean": false}] {"Access": 1}
+#58 Move "Move"
+   in G <= #52 List Item(Item).i
+   in T <= #59 Negative(Neg).y data=[{"vector": [0.0, 0.0, 10.0]}]
+#59 Negative "Neg"
+   in x <= #82 Unit Y(Y).V
+#60 Line "Ln"
+   in A <= #52 List Item(Item).i
+   in B <= #62 List Item(Item).i
+#61 Reverse List "Rev"
+   in L <= #54 Sort List(Sort).A {"Access": 1}
+#62 List Item "Item" {"BaseOutputIndex": 0}
+   in L <= #61 Reverse List(Rev).L
+   in i data=[{"number": 0}]
+   in W data=[{"boolean": true}]
+#63 Curve Middle "MidPt"
+   in C <= #60 Line(Ln).L
+#64 Negative "Neg"
+   in x <= #78 Number Slider(midpoint setback X)
+#65 Move "Move"
+   in G <= #63 Curve Middle(MidPt).M
+   in T <= #67 Construct Point(Pt).Pt data=[{"vector": [0.0, 0.0, 10.0]}]
+#66 Merge "Merge"
+   in D1 <= #62 List Item(Item).i
+   in D2 <= #65 Move(Move).G
+   in D3 <= #58 Move(Move).G
+   in D4
+   in D5
+#67 Construct Point "Pt"
+   in X data=[{"number": 0.0}]
+   in Y <= #64 Negative(Neg).y data=[{"number": 0.0}]
+   in Z <= #68 Negative(Neg).y data=[{"number": 0.0}]
+#68 Negative "Neg"
+   in x <= #81 Number Slider(midpoint setback Z)
+#69 Interpolate (t) "IntCrv(t)"
+   in V <= #66 Merge(Merge).R {"Access": 1}
+   in Ts <= #85 Negative(Neg).y data=[{"vector": [0.0, 0.0, 0.0]}]
+   in Te <= #86 Negative(Neg).y data=[{"vector": [0.0, 0.0, 0.0]}]
+   in K data=[{"number": 1}]
+#70 Point In Curve "InCurve"
+   in P <= #71 Divide Curve(Divide).P
+   in C <= #13 Rectangle 2Pt(Rec 2Pt).R
+#71 Divide Curve "Divide"
+   in C <= #90 Join Curves(Join).C
+   in N data=[{"number": 50}]
+   in K data=[{"boolean": false}]
+#72 Stream Filter "Filter"
+   in G <= #75 Equality(Equals).= data=[{"number": 0}]
+   in 0 <= #73 Null Placeholder(Null).N
+   in 1 <= #90 Join Curves(Join).C
+#73 Null Placeholder "Null"
+#74 Member Index "MIndex"
+   in S <= #70 Point In Curve(InCurve).R {"Access": 1}
+   in M data=[{"TypeName": "Grasshopper.Kernel.Types.GH_Integer", "number": 0}]
+#75 Equality "Equals"
+   in A <= #74 Member Index(MIndex).N
+   in B data=[{"number": 0.0}]
+#76 GROUP "validation" members=6
+#77 Geometry "cross section"
+   <= #72 Stream Filter(Filter).S(1)
+#78 Number Slider "midpoint setback X"
+   extra {"Slider": {"Digits": 3, "GripDisplay": 1, "Interval": 0, "Max": 24.0, "Min": 0.0, "SnapCount": 0, "Value": 3.818}, "sub": []}
+#79 Number Slider "bottom setback"
+   extra {"Slider": {"Digits": 3, "GripDisplay": 1, "Interval": 0, "Max": 36.0, "Min": 0.0, "SnapCount": 0, "Value": 15.0}, "sub": []}
+#80 GROUP "cross section curve controls" members=1
+#81 Number Slider "midpoint setback Z"
+   extra {"Slider": {"Digits": 3, "GripDisplay": 1, "Interval": 0, "Max": 10.0, "Min": 0.0, "SnapCount": 0, "Value": 6.803}, "sub": []}
+#82 Unit Y "Y"
+   in F <= #79 Number Slider(bottom setback) data=[{"number": 1.0}]
+#83 Unit Z "Z"
+   in F data=[{"number": 1.0}]
+#84 Unit X "X"
+   in F data=[{"number": 1.0}]
+#85 Negative "Neg"
+   in x <= #83 Unit Z(Z).V
+#86 Negative "Neg"
+   in x <= #87 Unit Y(Y).V
+#87 Unit Y "Y"
+   in F data=[{"number": 1.0}]
+#88 Line "Ln"
+   in A <= #58 Move(Move).G
+   in B <= #89 Construct Point(Pt).Pt
+#89 Construct Point "Pt"
+   in X data=[{"number": 0.0}]
+   in Y data=[{"number": 0.0}]
+   in Z data=[{"number": 0.0}]
+#90 Join Curves "Join"
+   in C <= #91 Merge(Merge).R {"Access": 1}
+   in P data=[{"boolean": false}]
+#91 Merge "Merge"
+   in D1 <= #69 Interpolate (t)(IntCrv(t)).C
+   in D2 <= #88 Line(Ln).L
+#92 Custom Preview "Preview" {"IncludeInRender": true, "ViewportFilter": ""}
+   in G <= #105 Stream Filter(Filter).S(0) {"Hidden": true}
+   in M <= #95 Colour Swatch(Swatch) data=[{"diffuse": -2252579, "emission": -12439486, "shine": 0.5, "specular": -1, "transparency": 0.0}]
+#93 Merge "Merge"
+   in D1 <= #13 Rectangle 2Pt(Rec 2Pt).R
+   in D2 <= #17 Rectangle 2Pt(Rec 2Pt).R
+   in D3 <= #110 Rectangle 2Pt(Rec 2Pt).R
+   in D4
+#94 Merge "Merge"
+   in D1 <= #90 Join Curves(Join).C
+   in D2
+   in D3 <= #66 Merge(Merge).R
+   in D4
+   in D5 <= #198 Flip Curve(Flip).C
+   in D6 <= #133 Merge(Merge).R
+   in D7
+   in D8 <= #394 Interpolate (t)(IntCrv(t)).C
+   in D9 <= #391 Merge(Merge).R
+#95 Colour Swatch "Swatch" {"SwatchColor": -16772612}
+#96 Custom Preview "Preview" {"IncludeInRender": true, "ViewportFilter": ""}
+   in G <= #107 Stream Filter(Filter).S(0) {"Hidden": true}
+   in M <= #102 Stream Filter(Filter).S(1) data=[{"diffuse": -2252579, "emission": -12439486, "shine": 0.5, "specular": -1, "transparency": 0.0}]
+#97 Colour Swatch "Swatch" {"SwatchColor": -65536}
+#98 GROUP "drawing validation preview" members=11
+#99 Colour Swatch "Swatch" {"SwatchColor": -12517632}
+#100 Member Index "MIndex"
+   in S <= #101 Merge(Merge).R {"Access": 1}
+   in M data=[{"TypeName": "Grasshopper.Kernel.Types.GH_Boolean", "boolean": false}]
+#101 Merge "Merge"
+   in D1 <= #75 Equality(Equals).=
+   in D2 <= #47 Equality(Equals).=
+   in D3 <= #142 Equality(Equals).=
+   in D4 <= #400 Equality(Equals).=
+#102 Stream Filter "Filter"
+   in G <= #103 Equality(Equals).= data=[{"number": 0}]
+   in 0 <= #97 Colour Swatch(Swatch)
+   in 1 <= #99 Colour Swatch(Swatch)
+#103 Equality "Equals"
+   in A <= #100 Member Index(MIndex).N
+   in B data=[{"number": 0.0}]
+#104 Boolean Toggle "Toggle" {"ToggleValue": false}
+#105 Stream Filter "Filter"
+   in G <= #104 Boolean Toggle(Toggle) data=[{"number": 0}]
+   in 0 <= #106 Null Placeholder(Null).N
+   in 1 <= #93 Merge(Merge).R
+#106 Null Placeholder "Null"
+#107 Stream Filter "Filter"
+   in G <= #104 Boolean Toggle(Toggle) data=[{"number": 0}]
+   in 0 <= #108 Null Placeholder(Null).N
+   in 1 <= #94 Merge(Merge).R
+#108 Null Placeholder "Null"
+#109 GROUP "TOGGLE TO DISPLAY " members=1
+#110 Rectangle 2Pt "Rec 2Pt"
+   in P <= #114 Move(Move).G data=[{"plane": [0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0]}]
+   in A <= #111 Unit Z(Z).V data=[{"Coordinate": [0.0, 0.0, 0.0]}]
+   in B <= #112 Construct Point(Pt).Pt
+   in R data=[{"number": 0.0}]
+#111 Unit Z "Z"
+   in F <= #5 Number Slider(height) data=[{"number": 1.0}] {"WireDisplay": 2}
+#112 Construct Point "Pt"
+   in X <= #12 Division(A/B).R data=[{"number": 0.0}] {"WireDisplay": 2}
+   in Y <= #11 Division(A/B).R data=[{"number": 0.0}] {"WireDisplay": 2}
+   in Z data=[{"number": 0.0}]
+#113 XY Plane "XY"
+   in O data=[{"Coordinate": [0.0, 0.0, 0.0]}]
+#114 Move "Move"
+   in G <= #113 XY Plane(XY).P
+   in T <= #111 Unit Z(Z).V data=[{"vector": [0.0, 0.0, 10.0]}]
+#115 Number Slider "midpoint setback X"
+   extra {"Slider": {"Digits": 3, "GripDisplay": 1, "Interval": 0, "Max": 100.0, "Min": 0.0, "SnapCount": 0, "Value": 43.22}, "sub": []}
+#116 Number Slider "front setback"
+   extra {"Slider": {"Digits": 3, "GripDisplay": 1, "Interval": 0, "Max": 150.0, "Min": 0.0, "SnapCount": 0, "Value": 104.0}, "sub": []}
+#117 Number Slider "midpoint setback Y"
+   extra {"Slider": {"Digits": 3, "GripDisplay": 1, "Interval": 0, "Max": 10.0, "Min": -10.0, "SnapCount": 0, "Value": -3.93}, "sub": []}
+#118 Deconstruct Brep "DeBrep"
+   in B <= #110 Rectangle 2Pt(Rec 2Pt).R
+#119 List Item "Item" {"BaseOutputIndex": 0}
+   in L <= #121 Sort List(Sort).A
+   in i data=[{"number": 0}]
+   in W data=[{"boolean": true}]
+#120 Deconstruct "pDecon"
+   in P <= #118 Deconstruct Brep(DeBrep).V
+#121 Sort List "Sort"
+   in K <= #122 Deconstruct(pDecon).X
+   in A <= #124 Dispatch(Dispatch).A
+#122 Deconstruct "pDecon"
+   in P <= #124 Dispatch(Dispatch).A
+#123 Equality "Equals"
+   in A <= #120 Deconstruct(pDecon).X
+   in B data=[{"number": 0.0}]
+#124 Dispatch "Dispatch"
+   in L <= #118 Deconstruct Brep(DeBrep).V {"Access": 1}
+   in P <= #123 Equality(Equals).≠ data=[{"boolean": true}, {"boolean": false}] {"Access": 1}
+#125 Move "Move"
+   in G <= #129 List Item(Item).i
+   in T <= #126 Negative(Neg).y data=[{"vector": [0.0, 0.0, 10.0]}]
+#126 Negative "Neg"
+   in x <= #150 Unit X(X).V
+#127 Line "Ln"
+   in A <= #119 List Item(Item).i
+   in B <= #129 List Item(Item).i
+#128 Reverse List "Rev"
+   in L <= #121 Sort List(Sort).A {"Access": 1}
+#129 List Item "Item" {"BaseOutputIndex": 0}
+   in L <= #128 Reverse List(Rev).L
+   in i data=[{"number": 0}]
+   in W data=[{"boolean": true}]
+#130 Curve Middle "MidPt"
+   in C <= #127 Line(Ln).L
+#131 Negative "Neg"
+   in x <= #115 Number Slider(midpoint setback X) {"WireDisplay": 2}
+#132 Move "Move"
+   in G <= #130 Curve Middle(MidPt).M
+   in T <= #134 Construct Point(Pt).Pt data=[{"vector": [0.0, 0.0, 10.0]}]
+#133 Merge "Merge"
+   in D1 <= #119 List Item(Item).i
+   in D2 <= #132 Move(Move).G
+   in D3 <= #125 Move(Move).G
+   in D4
+   in D5
+#134 Construct Point "Pt"
+   in X <= #131 Negative(Neg).y data=[{"number": 0.0}]
+   in Y <= #135 Negative(Neg).y data=[{"number": 0.0}]
+   in Z data=[{"number": 0.0}]
+#135 Negative "Neg"
+   in x <= #117 Number Slider(midpoint setback Y) {"WireDisplay": 2}
+#136 Interpolate (t) "IntCrv(t)"
+   in V <= #133 Merge(Merge).R {"Access": 1}
+   in Ts data=[{"vector": [0.0, 0.0, 0.0]}]
+   in Te <= #145 Negative(Neg).y data=[{"vector": [0.0, 0.0, 0.0]}]
+   in K data=[{"number": 1}]
+#137 Point In Curve "InCurve"
+   in P <= #138 Divide Curve(Divide).P
+   in C <= #110 Rectangle 2Pt(Rec 2Pt).R
+#138 Divide Curve "Divide"
+   in C <= #198 Flip Curve(Flip).C
+   in N data=[{"number": 50}]
+   in K data=[{"boolean": false}]
+#139 Stream Filter "Filter"
+   in G <= #142 Equality(Equals).= data=[{"number": 0}]
+   in 0 <= #140 Null Placeholder(Null).N
+   in 1 <= #198 Flip Curve(Flip).C
+#140 Null Placeholder "Null"
+#141 Member Index "MIndex"
+   in S <= #137 Point In Curve(InCurve).R {"Access": 1}
+   in M data=[{"TypeName": "Grasshopper.Kernel.Types.GH_Integer", "number": 0}]
+#142 Equality "Equals"
+   in A <= #141 Member Index(MIndex).N
+   in B data=[{"number": 0.0}]
+#143 GROUP "validation" members=6
+#144 Geometry "top curve"
+   <= #139 Stream Filter(Filter).S(1)
+#145 Negative "Neg"
+   in x <= #151 Unit X(X).V
+#146 Line "Ln"
+   in A <= #125 Move(Move).G
+   in B <= #147 Construct Point(Pt).Pt
+#147 Construct Point "Pt"
+   in X data=[{"number": 0.0}]
+   in Y <= #11 Division(A/B).R data=[{"number": 0.0}] {"WireDisplay": 2}
+   in Z <= #5 Number Slider(height) data=[{"number": 0.0}] {"WireDisplay": 2}
+#148 Join Curves "Join"
+   in C <= #149 Merge(Merge).R {"Access": 1}
+   in P data=[{"boolean": false}]
+#149 Merge "Merge"
+   in D1 <= #136 Interpolate (t)(IntCrv(t)).C
+   in D2 <= #146 Line(Ln).L
+#150 Unit X "X"
+   in F <= #116 Number Slider(front setback) data=[{"number": 1.0}] {"WireDisplay": 2}
+#151 Unit X "X"
+   in F data=[{"number": 1.0}]
+#152 Custom Preview "Preview" {"IncludeInRender": true, "ViewportFilter": ""}
+   in G <= #157 Stream Filter(Filter).S(0) {"Hidden": true}
+   in M <= #154 Colour Swatch(Swatch) data=[{"diffuse": -2252579, "emission": -12439486, "shine": 0.5, "specular": -1, "transparency": 0.0}]
+#153 Merge "Merge"
+   in D1 <= #77 Geometry(cross section)
+   in D2 <= #49 Geometry(forward)
+   in D3 <= #50 Geometry(bottom)
+   in D4 <= #144 Geometry(top curve)
+   in D5
+#154 Colour Swatch "Swatch" {"SwatchColor": -9830173}
+#155 GROUP "canoe contours preview" members=13
+#156 Boolean Toggle "Toggle" {"ToggleValue": false}
+#157 Stream Filter "Filter"
+   in G <= #156 Boolean Toggle(Toggle) data=[{"number": 0}]
+   in 0 <= #158 Null Placeholder(Null).N
+   in 1 <= #153 Merge(Merge).R
+#158 Null Placeholder "Null"
+#159 GROUP "TOGGLE TO DISPLAY " members=1
+#160 GROUP "top curve controls" members=5
+#161 GROUP "canoe bounding box" members=5
+#162 GROUP "bounding box" members=3
+#163 GROUP "generate vectors" members=15
+#164 Move "Move"
+   in G <= #176 Tween Curve(TweenCrv).T {"WireDisplay": 1}
+   in T <= #201 Unit X(X).V data=[{"vector": [0.0, 0.0, 10.0]}] {"WireDisplay": 1}
+#165 Curve | Plane "PCX"
+   in C <= #202 Geometry(bottom) {"WireDisplay": 1}
+   in P <= #164 Move(Move).G
+#166 Vector 2Pt "Vec2Pt"
+   in A <= #204 End Points(End).E
+   in B <= #165 Curve | Plane(PCX).P
+   in U data=[{"boolean": false}]
+#167 GROUP "position tweens to bottom" members=11
+#168 GROUP "scale and position" members=5
+#169 GROUP "move vector" members=1
+#170 Move "Move"
+   in G <= #183 Geometry(forward)
+   in T <= #172 Vector 2Pt(Vec2Pt).V data=[{"vector": [0.0, 0.0, 10.0]}]
+#171 End Points "End"
+   in C <= #183 Geometry(forward)
+#172 Vector 2Pt "Vec2Pt"
+   in A <= #171 End Points(End).E
+   in B <= #173 XY Plane(XY).P
+   in U data=[{"boolean": false}]
+#173 XY Plane "XY"
+   in O data=[{"Coordinate": [0.0, 0.0, 0.0]}]
+#174 Rotate "Rotate"
+   in G <= #170 Move(Move).G
+   in A <= #175 Number Slider() data=[{"number": 1.5707963267948966}] {"UseDegrees": true}
+   in P data=[{"plane": [0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0]}]
+#175 Number Slider ""
+   extra {"Slider": {"Digits": 3, "GripDisplay": 1, "Interval": 1, "Max": 180.0, "Min": -180.0, "SnapCount": 0, "Value": 90.0}, "sub": []}
+#176 Tween Curve "TweenCrv" {"BlendType": 0}
+   in A <= #184 Geometry(cross section)
+   in B <= #174 Rotate(Rotate).G
+   in F <= #179 Remap Numbers(ReMap).R data=[{"number": 0.5}]
+#177 Series "Series"
+   in S data=[{"number": 1.0}]
+   in N data=[{"number": 1.0}]
+   in C <= #185 Number Slider(division counter) data=[{"number": 10}] {"WireDisplay": 1}
+#178 GROUP "tween foward to cross section" members=12
+#179 Remap Numbers "ReMap"
+   in V <= #177 Series(Series).S
+   in S <= #181 Construct Domain(Dom).I data=[{"Interval": [0.0, 1.0]}]
+   in T data=[{"Interval": [0.0, 1.0]}]
+#180 List Item "Item" {"BaseOutputIndex": 1}
+   in L <= #177 Series(Series).S
+   in i data=[{"number": 0}]
+   in W data=[{"boolean": true}]
+#181 Construct Domain "Dom"
+   in A <= #180 List Item(Item).i data=[{"number": 0.0}]
+   in B <= #180 List Item(Item).-1 data=[{"number": 1.0}]
+#182 GROUP "build tween domain" members=4
+#183 Geometry "forward"
+   <= #49 Geometry(forward)
+#184 Geometry "cross section"
+   <= #77 Geometry(cross section)
+#185 Number Slider "division counter"
+   extra {"Slider": {"Digits": 3, "GripDisplay": 1, "Interval": 1, "Max": 30.0, "Min": 2.0, "SnapCount": 0, "Value": 20.0}, "sub": []}
+#186 Negative "Neg"
+   in x <= #187 Unit Z(Z).V
+#187 Unit Z "Z"
+   in F data=[{"number": 1.0}]
+#188 Number Slider "rocker Z offset"
+   extra {"Slider": {"Digits": 3, "GripDisplay": 1, "Interval": 0, "Max": 5.0, "Min": 0.0, "SnapCount": 0, "Value": 3.0}, "sub": []}
+#189 Construct Point "Pt"
+   in X <= #32 Negative(Neg).y data=[{"number": 0.0}]
+   in Y data=[{"number": 0.0}]
+   in Z <= #188 Number Slider(rocker Z offset) data=[{"number": 0.0}]
+#190 List Item "Item" {"BaseOutputIndex": 0}
+   in L <= #44 Stream Filter(Filter).S(1)
+   in i data=[{"number": 0}]
+   in W data=[{"boolean": true}]
+#191 List Item "Item" {"BaseOutputIndex": 0}
+   in L <= #44 Stream Filter(Filter).S(1)
+   in i data=[{"number": 0}]
+   in W data=[{"boolean": true}]
+#192 Bounding Box "BBox"
+   extra {"ValueTable": {"UnionBox": true}, "sub": []}
+   in C <= #202 Geometry(bottom) {"Access": 1}
+   in P data=[{"plane": [0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0]}] {"Hidden": true}
+#193 Deconstruct Brep "DeBrep"
+   in B <= #192 Bounding Box(BBox).B
+#194 Length "Len"
+   in C <= #193 Deconstruct Brep(DeBrep).E
+#195 Sort List "Sort"
+   in K <= #194 Length(Len).L
+   in A <= #193 Deconstruct Brep(DeBrep).E
+#196 List Item "Item" {"BaseOutputIndex": 0}
+   in L <= #195 Sort List(Sort).A
+   in i data=[{"number": 0}]
+   in W data=[{"boolean": true}]
+#197 GROUP "bottom rocker control" members=3
+#198 Flip Curve "Flip"
+   in C <= #148 Join Curves(Join).C
+   in G
+#199 Divide Curve "Divide"
+   in C <= #196 List Item(Item).i
+   in N <= #185 Number Slider(division counter) data=[{"number": 10}] {"WireDisplay": 1}
+   in K data=[{"boolean": false}]
+#200 Deconstruct "pDecon"
+   in P <= #199 Divide Curve(Divide).P
+#201 Unit X "X"
+   in F <= #200 Deconstruct(pDecon).X data=[{"number": 1.0}]
+#202 Geometry "bottom"
+   <= #50 Geometry(bottom)
+#203 GROUP "disperse tween" members=9
+#204 End Points "End"
+   in C <= #164 Move(Move).G
+#205 Move "Move"
+   in G <= #164 Move(Move).G
+   in T <= #166 Vector 2Pt(Vec2Pt).V data=[{"vector": [0.0, 0.0, 10.0]}]
+#206 Rotate "Rotate"
+   in G <= #205 Move(Move).G
+   in A <= #212 Merge(Merge).R data=[{"number": 1.5707963267948966}] {"InternalExpression": "-x", "UseDegrees": true}
+   in P <= #165 Curve | Plane(PCX).P data=[{"plane": [0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0]}]
+#207 Series "Series"
+   in S <= #208 Division(A/B).R data=[{"number": 0.0}]
+   in N <= #208 Division(A/B).R data=[{"number": 1.0}]
+   in C <= #215 Stream Filter(Filter).S(0) data=[{"number": 10}]
+#208 Division "A/B"
+   in A <= #209 Number Slider()
+   in B <= #215 Stream Filter(Filter).S(0)
+#209 Number Slider ""
+   extra {"Slider": {"Digits": 3, "GripDisplay": 1, "Interval": 1, "Max": 100.0, "Min": 0.0, "SnapCount": 0, "Value": 90.0}, "sub": []}
+#210 GROUP "rotation series" members=9
+#211 Number Slider "rotated divisions counter"
+   extra {"Slider": {"Digits": 3, "GripDisplay": 1, "Interval": 1, "Max": 30.0, "Min": 0.0, "SnapCount": 0, "Value": 20.0}, "sub": []}
+#212 Merge "Merge"
+   in D1 <= #213 Number(Zero)
+   in D2 <= #207 Series(Series).S
+#213 Number "Zero"
+   data [{"number": 0.0}]
+   extra {"PersistentData": {"Count": 1}, "sub": [["Branch", {"Count": 1, "Path": "{0}"}]]}
+#214 Larger Than "Larger"
+   in A <= #211 Number Slider(rotated divisions counter) {"WireDisplay": 1}
+   in B <= #185 Number Slider(division counter) data=[{"number": 0.0}] {"WireDisplay": 1}
+#215 Stream Filter "Filter"
+   in G <= #214 Larger Than(Larger).> data=[{"number": 0}]
+   in 0 <= #211 Number Slider(rotated divisions counter)
+   in 1 <= #185 Number Slider(division counter)
+#216 Scale NU "Scale NU"
+   in G <= #221 Extend Curve(Ext).C
+   in P data=[{"plane": [0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0]}]
+   in X data=[{"number": 1.0}]
+   in Y <= #231 Division(A/B).R data=[{"number": 1.0}]
+   in Z data=[{"number": 1.0}]
+#217 GROUP "filter eranous values" members=2
+#218 GROUP "rotate tweens" members=1
+#219 Curve | Plane "PCX"
+   in C <= #221 Extend Curve(Ext).C
+   in P <= #220 Geometry(top curve) {"WireDisplay": 1}
+#220 Geometry "top curve"
+   <= #144 Geometry(top curve)
+#221 Extend Curve "Ext"
+   in C <= #206 Rotate(Rotate).G
+   in T data=[{"number": 0}]
+   in L0 <= #228 Subtraction(A-B).R
+   in L1 data=[{"number": 0.0}]
+#222 End Points "End"
+   in C <= #206 Rotate(Rotate).G
+#223 Deconstruct "pDecon"
+   in P <= #222 End Points(End).S
+#224 Bounding Box "BBox"
+   in C <= #220 Geometry(top curve) {"Access": 1, "WireDisplay": 1}
+   in P data=[{"plane": [0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0]}] {"Hidden": true}
+#225 Deconstruct Brep "DeBrep"
+   in B <= #224 Bounding Box(BBox).B
+#226 Sort List "Sort"
+   in K <= #227 Deconstruct(pDecon).Z
+   in A <= #225 Deconstruct Brep(DeBrep).V
+#227 Deconstruct "pDecon"
+   in P <= #225 Deconstruct Brep(DeBrep).V
+#228 Subtraction "A-B"
+   in A <= #226 Sort List(Sort).K
+   in B <= #223 Deconstruct(pDecon).Z
+#229 GROUP "extend tween to top curve" members=8
+#230 Curve Closest Point "Crv CP"
+   in P <= #219 Curve | Plane(PCX).P
+   in C <= #220 Geometry(top curve) {"WireDisplay": 1}
+#231 Division "A/B"
+   in A <= #232 Deconstruct(pDecon).Y
+   in B <= #236 Pick'n'Choose(P'n'C).R
+#232 Deconstruct "pDecon"
+   in P <= #230 Curve Closest Point(Crv CP).P
+#233 Deconstruct "pDecon"
+   in P <= #219 Curve | Plane(PCX).P
+#234 Equality "Equals"
+   in A <= #233 Deconstruct(pDecon).Y
+   in B <= #235 Number(Zero)
+#235 Number "Zero"
+   data [{"number": 0.0}]
+   extra {"PersistentData": {"Count": 1}, "sub": [["Branch", {"Count": 1, "Path": "{0}"}]]}
+#236 Pick'n'Choose "P'n'C"
+   in P <= #234 Equality(Equals).= data=[{"number": 0}, {"number": 1}]
+   in 0 <= #233 Deconstruct(pDecon).Y
+   in 1 <= #237 Number(One)
+#237 Number "One"
+   data [{"number": 1.0}]
+   extra {"PersistentData": {"Count": 1}, "sub": [["Branch", {"Count": 1, "Path": "{0}"}]]}
+#238 GROUP "scale to match top curve" members=10
+#239 Custom Preview "Preview" {"IncludeInRender": true, "ViewportFilter": ""}
+   in G <= #243 Stream Filter(Filter).S(0) {"Hidden": true}
+   in M <= #240 Colour Swatch(Swatch) data=[{"diffuse": -2252579, "emission": -12439486, "shine": 0.5, "specular": -1, "transparency": 0.0}]
+#240 Colour Swatch "Swatch" {"SwatchColor": -65332}
+#241 GROUP "canoe guide contours preview" members=13
+#242 Boolean Toggle "Toggle" {"ToggleValue": false}
+#243 Stream Filter "Filter"
+   in G <= #242 Boolean Toggle(Toggle) data=[{"number": 0}]
+   in 0 <= #244 Null Placeholder(Null).N
+   in 1 <= #216 Scale NU(Scale NU).G
+#244 Null Placeholder "Null"
+#245 GROUP "TOGGLE TO DISPLAY " members=1
+#246 Loft "Loft"
+   in C <= #312 Geometry(guide curves) {"Access": 1}
+   in O data=[{"Adjust": false, "Closed": false, "LoftEnds": 0, "LoftSimp": 0, "LoftType": 0, "Rebuild": 10, "Refit": 0.01}]
+#247 Mirror "Mirror"
+   in G <= #246 Loft(Loft).L
+   in P data=[{"plane": [0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]}]
+#248 Mirror "Mirror"
+   in G <= #246 Loft(Loft).L, #247 Mirror(Mirror).G
+   in P <= #249 XZ Plane(XZ).P data=[{"plane": [0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]}]
+#249 XZ Plane "XZ"
+   in O data=[{"Coordinate": [0.0, 0.0, 0.0]}]
+#250 Negative "Neg"
+   in x <= #254 Number Slider(midpoint setback X) {"WireDisplay": 2}
+#251 Move "Move"
+   in G <= #130 Curve Middle(MidPt).M
+   in T <= #252 Construct Point(Pt).Pt data=[{"vector": [0.0, 0.0, 10.0]}]
+#252 Construct Point "Pt"
+   in X <= #250 Negative(Neg).y data=[{"number": 0.0}]
+   in Y <= #253 Negative(Neg).y data=[{"number": 0.0}]
+   in Z data=[{"number": 0.0}]
+#253 Negative "Neg"
+   in x <= #255 Number Slider(midpoint setback Y) {"WireDisplay": 2}
+#254 Number Slider "midpoint setback X"
+   extra {"Slider": {"Digits": 3, "GripDisplay": 1, "Interval": 0, "Max": 100.0, "Min": 0.0, "SnapCount": 0, "Value": 84.89}, "sub": []}
+#255 Number Slider "midpoint setback Y"
+   extra {"Slider": {"Digits": 3, "GripDisplay": 1, "Interval": 0, "Max": 10.0, "Min": -10.0, "SnapCount": 0, "Value": -6.916}, "sub": []}
+#256 GROUP "" members=2
+#257 GROUP "" members=2
+#258 Brep Join "Join"
+   in B <= #248 Mirror(Mirror).G, #247 Mirror(Mirror).G, #246 Loft(Loft).L {"Access": 1, "Mapping": 1}
+#259 Cap Holes "Cap"
+   in B <= #258 Brep Join(Join).B
+#260 Geometry "top curve" {"WireDisplay": 2}
+   <= #144 Geometry(top curve)
+#261 XZ Plane "XZ"
+   in O data=[{"Coordinate": [0.0, 0.0, 0.0]}]
+#262 Project "Project"
+   in G <= #260 Geometry(top curve)
+   in P <= #261 XZ Plane(XZ).P data=[{"plane": [0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0]}]
+#263 Move "Move"
+   in G <= #347 Geometry(canoe)
+   in T <= #372 Stream Filter(Filter).S(1) data=[{"vector": [0.0, 0.0, 10.0]}]
+#264 Vector XYZ "Vec"
+   in X <= #356 Subtraction(A-B).R data=[{"number": 0.0}]
+   in Y data=[{"number": 0.0}]
+   in Z <= #265 Number Slider(canoe Z offset from block bottom) data=[{"number": 0.0}]
+#265 Number Slider "canoe Z offset from block bottom"
+   extra {"Slider": {"Digits": 3, "GripDisplay": 1, "Interval": 0, "Max": 10.0, "Min": 0.0, "SnapCount": 0, "Value": 2.0}, "sub": []}
+#266 GROUP "solidify canoe" members=6
+#267 Number Slider "num blocks per row"
+   extra {"Slider": {"Digits": 3, "GripDisplay": 1, "Interval": 1, "Max": 30.0, "Min": 2.0, "SnapCount": 0, "Value": 14.0}, "sub": []}
+#268 Number Slider "num rows"
+   extra {"Slider": {"Digits": 3, "GripDisplay": 1, "Interval": 1, "Max": 3.0, "Min": 0.0, "SnapCount": 0, "Value": 2.0}, "sub": []}
+#269 Number Slider "width"
+   extra {"Slider": {"Digits": 3, "GripDisplay": 1, "Interval": 0, "Max": 40.0, "Min": 0.0, "SnapCount": 0, "Value": 16.0}, "sub": []}
+#270 Number Slider "depth"
+   extra {"Slider": {"Digits": 3, "GripDisplay": 1, "Interval": 0, "Max": 30.0, "Min": 0.0, "SnapCount": 0, "Value": 16.0}, "sub": []}
+#271 Number Slider "height"
+   extra {"Slider": {"Digits": 3, "GripDisplay": 1, "Interval": 0, "Max": 30.0, "Min": 0.0, "SnapCount": 0, "Value": 24.0}, "sub": []}
+#272 Rectangular Array "ArrRec"
+   in G <= #273 Center Box(Box).B
+   in C <= #273 Center Box(Box).B data=[{"Plane": [0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0], "Size": [0.0, 10.0, 0.0, 5.0]}]
+   in X <= #267 Number Slider(num blocks per row) data=[{"number": 6}]
+   in Y <= #268 Number Slider(num rows) data=[{"number": 3}]
+#273 Center Box "Box"
+   in B data=[{"plane": [0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0]}]
+   in X <= #269 Number Slider(width) data=[{"number": 1.0}] {"InternalExpression": "x/2"}
+   in Y <= #270 Number Slider(depth) data=[{"number": 1.0}] {"InternalExpression": "x/2"}
+   in Z <= #271 Number Slider(height) data=[{"number": 1.0}] {"InternalExpression": "x/2"}
+#274 Bounding Box "BBox"
+   in C <= #276 Solid Union(SUnion).R {"Access": 1}
+   in P data=[{"plane": [0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0]}] {"Hidden": true}
+#275 Deconstruct Brep "DeBrep"
+   in B <= #274 Bounding Box(BBox).B
+#276 Solid Union "SUnion"
+   in B <= #272 Rectangular Array(ArrRec).G {"Access": 1}
+#277 Area "Area"
+   in G <= #275 Deconstruct Brep(DeBrep).F
+#278 Deconstruct "pDecon"
+   in P <= #277 Area(Area).C
+#279 Sort List "Sort"
+   in K <= #278 Deconstruct(pDecon).Z
+   in A <= #277 Area(Area).C
+#280 List Item "Item" {"BaseOutputIndex": 0}
+   in L <= #279 Sort List(Sort).A
+   in i data=[{"number": 0}]
+   in W data=[{"boolean": true}]
+#281 Vector 2Pt "Vec2Pt"
+   in A <= #280 List Item(Item).i
+   in B <= #282 Construct Point(Pt).Pt
+   in U data=[{"boolean": false}]
+#282 Construct Point "Pt"
+   in X data=[{"number": 0.0}]
+   in Y data=[{"number": 0.0}]
+   in Z data=[{"number": 0.0}]
+#283 Move "Move"
+   in G <= #272 Rectangular Array(ArrRec).G
+   in T <= #281 Vector 2Pt(Vec2Pt).V data=[{"vector": [0.0, 0.0, 10.0]}]
+#284 Move "Move"
+   in G <= #262 Project(Project).G
+   in T <= #313 Unit Z(Z).V data=[{"vector": [0.0, 0.0, 10.0]}]
+#285 GROUP "top trim plane" members=9
+#286 Mirror "Mirror"
+   in G <= #288 Extend Curve(Ext).C
+   in P <= #287 YZ Plane(YZ).P data=[{"plane": [0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]}]
+#287 YZ Plane "YZ"
+   in O data=[{"Coordinate": [0.0, 0.0, 0.0]}]
+#288 Extend Curve "Ext"
+   in C <= #284 Move(Move).G
+   in T data=[{"number": 0}]
+   in L0 data=[{"number": 0.0}]
+   in L1 <= #289 Length(Len).L data=[{"number": 0.0}]
+#289 Length "Len"
+   in C <= #284 Move(Move).G
+#290 Extrude "Extr"
+   in B <= #297 Join Curves(Join).C
+   in D <= #291 Unit Y(Y).V
+#291 Unit Y "Y"
+   in F <= #289 Length(Len).L data=[{"number": 1.0}]
+#292 Negative "Neg"
+   in x <= #291 Unit Y(Y).V
+#293 Extrude "Extr"
+   in B <= #297 Join Curves(Join).C
+   in D <= #292 Negative(Neg).y
+#294 Extrude "Extr"
+   in B <= #290 Extrude(Extr).E, #293 Extrude(Extr).E
+   in D <= #295 Unit Z(Z).V
+#295 Unit Z "Z"
+   in F <= #271 Number Slider(height) data=[{"number": 1.0}]
+#296 Solid Difference "SDiff"
+   in A <= #283 Move(Move).G {"Access": 1}
+   in B <= #294 Extrude(Extr).E {"Access": 1}
+#297 Join Curves "Join"
+   in C <= #286 Mirror(Mirror).G, #288 Extend Curve(Ext).C {"Access": 1}
+   in P data=[{"boolean": false}]
+#298 GROUP "trim blocks" members=12
+#299 GROUP "make blocks" members=12
+#300 Solid Difference "SDiff"
+   in A <= #296 Solid Difference(SDiff).R {"Access": 1}
+   in B <= #263 Move(Move).G {"Access": 1}
+#301 Custom Preview "Preview" {"IncludeInRender": true, "ViewportFilter": ""}
+   in G <= #305 Stream Filter(Filter).S(0) {"Hidden": true}
+   in M <= #302 Colour Swatch(Swatch) data=[{"diffuse": -2252579, "emission": -12439486, "shine": 0.5, "specular": -1, "transparency": 0.0}]
+#302 Colour Swatch "Swatch" {"SwatchColor": -1016047104}
+#303 GROUP "mold blocks preview" members=13
+#304 Boolean Toggle "Toggle" {"ToggleValue": false}
+#305 Stream Filter "Filter"
+   in G <= #304 Boolean Toggle(Toggle) data=[{"number": 0}]
+   in 0 <= #306 Null Placeholder(Null).N
+   in 1 <= #300 Solid Difference(SDiff).R
+#306 Null Placeholder "Null"
+#307 GROUP "TOGGLE TO DISPLAY " members=1
+#308 GROUP "flat back setting" members=6
+#309 GROUP "block sizes" members=3
+#310 GROUP "num blocks" members=2
+#311 GROUP "canoe placement" members=2
+#312 Geometry "guide curves" {"WireDisplay": 2}
+   <= #216 Scale NU(Scale NU).G
+#313 Unit Z "Z"
+   in F <= #265 Number Slider(canoe Z offset from block bottom) data=[{"number": 1.0}]
+#314 Custom Preview "Preview" {"IncludeInRender": true, "ViewportFilter": ""}
+   in G <= #318 Stream Filter(Filter).S(1) {"Hidden": true}
+   in M <= #315 Colour Swatch(Swatch) data=[{"diffuse": -2252579, "emission": -12439486, "shine": 0.5, "specular": -1, "transparency": 0.0}]
+#315 Colour Swatch "Swatch" {"SwatchColor": -12311729}
+#316 GROUP "canoe solid" members=13
+#317 Boolean Toggle "Toggle" {"ToggleValue": true}
+#318 Stream Filter "Filter"
+   in G <= #317 Boolean Toggle(Toggle) data=[{"number": 0}]
+   in 0 <= #319 Null Placeholder(Null).N
+   in 1 <= #424 Solid Difference(SDiff).R
+#319 Null Placeholder "Null"
+#320 GROUP "TOGGLE TO DISPLAY " members=1
+#321 GROUP "canoe smoothness control" members=2
+#322 Move "Move"
+   in G <= #331 List Item(Item).i
+   in T <= #324 Unit X(X).V data=[{"vector": [0.0, 0.0, 10.0]}]
+#323 Number Slider "canoe end chop"
+   extra {"Slider": {"Digits": 3, "GripDisplay": 1, "Interval": 0, "Max": 50.0, "Min": 0.0, "SnapCount": 0, "Value": 0.0}, "sub": []}
+#324 Unit X "X"
+   in F <= #323 Number Slider(canoe end chop) data=[{"number": 1.0}]
+#325 Split Brep "Split"
+   in B <= #259 Cap Holes(Cap).B
+   in C <= #322 Move(Move).G
+#326 Bounding Box "BBox"
+   in C <= #259 Cap Holes(Cap).B {"Access": 1, "WireDisplay": 1}
+   in P data=[{"plane": [0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0]}] {"Hidden": true}
+#327 Deconstruct Brep "DeBrep"
+   in B <= #326 Bounding Box(BBox).B
+#328 Sort List "Sort"
+   in K <= #330 Deconstruct(pDecon).X
+   in A <= #327 Deconstruct Brep(DeBrep).F
+#329 Area "Area"
+   in G <= #327 Deconstruct Brep(DeBrep).F
+#330 Deconstruct "pDecon"
+   in P <= #329 Area(Area).C
+#331 List Item "Item" {"BaseOutputIndex": 0}
+   in L <= #328 Sort List(Sort).A
+   in i data=[{"number": 0}]
+   in W data=[{"boolean": true}]
+#332 List Item "Item" {"BaseOutputIndex": 0}
+   in L <= #325 Split Brep(Split).R
+   in i data=[{"number": 0}]
+   in W data=[{"boolean": true}]
+#333 Cap Holes "Cap"
+   in B <= #332 List Item(Item).i
+#334 Shell Polysurface "ShellPsrf"
+   in Ps <= #438 Stream Filter(Filter).S(1)
+   in R <= #436 Stream Filter(Filter).S(1) data=[{"number": 1}, {"number": 0}] {"Access": 1}
+   in T <= #341 Number Slider(shell wall thickness) data=[{"number": 1.0}]
+   in F data=[{"boolean": false}]
+#335 GROUP "trim back" members=11
+#336 Deconstruct Brep "DeBrep"
+   in B <= #443 Geometry(canoe solid)
+#337 Area "Area"
+   in G <= #336 Deconstruct Brep(DeBrep).F
+#338 Sort List "Sort"
+   in K <= #339 Deconstruct(pDecon).Z
+   in A <= #336 Deconstruct Brep(DeBrep).F
+#339 Deconstruct "pDecon"
+   in P <= #337 Area(Area).C
+#340 Geometry "BAKE ME"
+   <= #454 Cap Holes Ex(CapEx).B
+#341 Number Slider "shell wall thickness"
+   extra {"Slider": {"Digits": 3, "GripDisplay": 1, "Interval": 0, "Max": 1.0, "Min": 0.0, "SnapCount": 0, "Value": 0.5}, "sub": []}
+#342 Item Index "Index"
+   in L <= #336 Deconstruct Brep(DeBrep).F {"Access": 1}
+   in i <= #343 List Item(Item).i
+#343 List Item "Item" {"BaseOutputIndex": 0}
+   in L <= #338 Sort List(Sort).A
+   in i data=[{"number": 0}]
+   in W data=[{"boolean": true}]
+#344 GROUP "for 3D Print" members=21
+#345 GROUP "" members=1
+#346 GROUP "" members=1
+#347 Geometry "canoe" {"WireDisplay": 2}
+   <= #333 Cap Holes(Cap).B
+#348 GROUP "place canoe" members=16
+#349 Bounding Box "BBox"
+   in C <= #347 Geometry(canoe) {"Access": 1}
+   in P data=[{"plane": [0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0]}] {"Hidden": true}
+#350 Deconstruct Brep "DeBrep"
+   in B <= #349 Bounding Box(BBox).B
+#351 Sort List "Sort"
+   in K <= #353 Deconstruct(pDecon).X
+   in A <= #350 Deconstruct Brep(DeBrep).F
+#352 Area "Area"
+   in G <= #350 Deconstruct Brep(DeBrep).F
+#353 Deconstruct "pDecon"
+   in P <= #352 Area(Area).C
+#354 List Item "Item" {"BaseOutputIndex": 0}
+   in L <= #351 Sort List(Sort).K
+   in i data=[{"number": 0}]
+   in W data=[{"boolean": true}]
+#355 Multiplication "A×B"
+   in A <= #269 Number Slider(width)
+   in B <= #357 Division(A/B).R
+#356 Subtraction "A-B"
+   in A <= #359 Addition(A+B).R
+   in B <= #354 List Item(Item).i
+#357 Division "A/B"
+   in A <= #267 Number Slider(num blocks per row) {"WireDisplay": 1}
+   in B data=[{"TypeName": "Grasshopper.Kernel.Types.GH_Integer", "number": 2}]
+#358 Negative "Neg"
+   in x <= #355 Multiplication(A×B).R
+#359 Addition "A+B"
+   in A <= #358 Negative(Neg).y
+   in B <= #269 Number Slider(width)
+#360 Scribble "Scribble" {"Bold": true, "Ca": [3283.950927734375, -740.4359130859375], "Cb": [4118.1953125, -740.4359130859375], "Cc": [4118.1953125, -665.9788818359375], "Cd": [3283.950927734375, -665.9788818359375], "Font": "Microsoft Sans Serif", "Italic": false, "Size": 98.0, "Text": "CANOE LOFTING"}
+#361 Scribble "Scribble" {"Bold": true, "Ca": [838.7503662109375, -744.8274536132812], "Cb": [1902.0120849609375, -744.8274536132812], "Cc": [1902.0120849609375, -670.3704223632812], "Cd": [838.7503662109375, -670.3704223632812], "Font": "Microsoft Sans Serif", "Italic": false, "Size": 98.0, "Text": "CURVE GENERATION"}
+#362 Scribble "Scribble" {"Bold": true, "Ca": [4911.5625, -733.3141479492188], "Cb": [5686.5185546875, -733.3141479492188], "Cc": [5686.5185546875, -658.8571166992188], "Cd": [4911.5625, -658.8571166992188], "Font": "Microsoft Sans Serif", "Italic": false, "Size": 98.0, "Text": "FINAL SHAPING"}
+#363 Scribble "Scribble" {"Bold": true, "Ca": [6606.720703125, -727.2979125976562], "Cb": [7982.0224609375, -727.2979125976562], "Cc": [7982.0224609375, -652.8408813476562], "Cd": [6606.720703125, -652.8408813476562], "Font": "Microsoft Sans Serif", "Italic": false, "Size": 98.0, "Text": "MOLD BLOCK GENERATION"}
+#364 Number Slider "midpoint setback X"
+   extra {"Slider": {"Digits": 3, "GripDisplay": 1, "Interval": 0, "Max": 100.0, "Min": 0.0, "SnapCount": 0, "Value": 6.96}, "sub": []}
+#365 Number Slider "midpoint setback Z"
+   extra {"Slider": {"Digits": 3, "GripDisplay": 1, "Interval": 0, "Max": 10.0, "Min": -10.0, "SnapCount": 0, "Value": -0.5}, "sub": []}
+#366 Move "Move"
+   in G <= #368 Curve Middle(MidPt).M
+   in T <= #369 Construct Point(Pt).Pt data=[{"vector": [0.0, 0.0, 10.0]}]
+#367 Line "Ln"
+   in A <= #31 Move(Move).G
+   in B <= #370 Construct Point(Pt).Pt
+#368 Curve Middle "MidPt"
+   in C <= #367 Line(Ln).L
+#369 Construct Point "Pt"
+   in X <= #364 Number Slider(midpoint setback X) data=[{"number": 0.0}]
+   in Y data=[{"number": 0.0}]
+   in Z <= #365 Number Slider(midpoint setback Z) data=[{"number": 0.0}]
+#370 Construct Point "Pt"
+   in X data=[{"number": 0.0}]
+   in Y data=[{"number": 0.0}]
+   in Z data=[{"number": 0.0}]
+#371 Negative "Neg"
+   in x <= #84 Unit X(X).V
+#372 Stream Filter "Filter"
+   in G <= #373 Equality(Equals).= data=[{"number": 0}]
+   in 0 <= #264 Vector XYZ(Vec).V
+   in 1 <= #374 Vector XYZ(Vec).V
+#373 Equality "Equals"
+   in A <= #323 Number Slider(canoe end chop) {"WireDisplay": 1}
+   in B data=[{"number": 0.0}]
+#374 Vector XYZ "Vec"
+   in X data=[{"number": 0.0}]
+   in Y data=[{"number": 0.0}]
+   in Z <= #265 Number Slider(canoe Z offset from block bottom) data=[{"number": 0.0}]
+#375 GROUP "top rocker" members=63
+#376 Rectangle 2Pt "Rec 2Pt"
+   in P <= #377 XZ Plane(XZ).P data=[{"plane": [0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0]}]
+   in A <= #379 Unit X(X).V data=[{"Coordinate": [0.0, 0.0, 0.0]}]
+   in B <= #378 Unit Z(Z).V
+   in R data=[{"number": 0.0}]
+#377 XZ Plane "XZ"
+   in O data=[{"Coordinate": [0.0, 0.0, 0.0]}]
+#378 Unit Z "Z"
+   in F <= #5 Number Slider(height) data=[{"number": 1.0}] {"WireDisplay": 2}
+#379 Unit X "X"
+   in F <= #12 Division(A/B).R data=[{"number": 1.0}] {"WireDisplay": 2}
+#380 Deconstruct Brep "DeBrep"
+   in B <= #376 Rectangle 2Pt(Rec 2Pt).R
+#381 List Item "Item" {"BaseOutputIndex": 0}
+   in L <= #383 Sort List(Sort).A
+   in i data=[{"number": 0}]
+   in W data=[{"boolean": true}]
+#382 Deconstruct "pDecon"
+   in P <= #380 Deconstruct Brep(DeBrep).V
+#383 Sort List "Sort"
+   in K <= #384 Deconstruct(pDecon).Z
+   in A <= #386 Dispatch(Dispatch).A
+#384 Deconstruct "pDecon"
+   in P <= #386 Dispatch(Dispatch).A
+#385 Equality "Equals"
+   in A <= #382 Deconstruct(pDecon).Z
+   in B data=[{"number": 0.0}]
+#386 Dispatch "Dispatch"
+   in L <= #380 Deconstruct Brep(DeBrep).V {"Access": 1}
+   in P <= #385 Equality(Equals).≠ data=[{"boolean": true}, {"boolean": false}] {"Access": 1}
+#387 Reverse List "Rev"
+   in L <= #383 Sort List(Sort).A {"Access": 1}
+#388 List Item "Item" {"BaseOutputIndex": 0}
+   in L <= #387 Reverse List(Rev).L
+   in i data=[{"number": 0}]
+   in W data=[{"boolean": true}]
+#389 Negative "Neg"
+   in x <= #392 Number Slider(rocker center offset Z)
+#390 Move "Move"
+   in G <= #381 List Item(Item).i
+   in T <= #393 Construct Point(Pt).Pt data=[{"vector": [0.0, 0.0, 10.0]}]
+#391 Merge "Merge"
+   in D1 <= #388 List Item(Item).i
+   in D2 <= #409 Move(Move).G
+   in D3 <= #390 Move(Move).G
+   in D4
+#392 Number Slider "rocker center offset Z"
+   extra {"Slider": {"Digits": 3, "GripDisplay": 1, "Interval": 0, "Max": 10.0, "Min": -10.0, "SnapCount": 0, "Value": 2.0}, "sub": []}
+#393 Construct Point "Pt"
+   in X data=[{"number": 0.0}]
+   in Y data=[{"number": 0.0}]
+   in Z <= #389 Negative(Neg).y data=[{"number": 0.0}]
+#394 Interpolate (t) "IntCrv(t)"
+   in V <= #391 Merge(Merge).R {"Access": 1}
+   in Ts data=[{"vector": [0.0, 0.0, 0.0]}]
+   in Te <= #406 Negative(Neg).y data=[{"vector": [0.0, 0.0, 0.0]}]
+   in K data=[{"number": 1}]
+#395 Point In Curve "InCurve"
+   in P <= #396 Divide Curve(Divide).P
+   in C <= #376 Rectangle 2Pt(Rec 2Pt).R
+#396 Divide Curve "Divide"
+   in C <= #394 Interpolate (t)(IntCrv(t)).C
+   in N data=[{"number": 50}]
+   in K data=[{"boolean": false}]
+#397 Stream Filter "Filter"
+   in G <= #400 Equality(Equals).= data=[{"number": 0}]
+   in 0 <= #398 Null Placeholder(Null).N
+   in 1 <= #394 Interpolate (t)(IntCrv(t)).C
+#398 Null Placeholder "Null"
+#399 Member Index "MIndex"
+   in S <= #395 Point In Curve(InCurve).R {"Access": 1}
+   in M data=[{"TypeName": "Grasshopper.Kernel.Types.GH_Integer", "number": 0}]
+#400 Equality "Equals"
+   in A <= #399 Member Index(MIndex).N
+   in B data=[{"number": 0.0}]
+#401 GROUP "validation" members=6
+#402 Geometry "top rocker"
+   <= #397 Stream Filter(Filter).S(1)
+#403 Unit X "X"
+   in F data=[{"number": 1.0}]
+#404 Number Slider "midpoint setback X"
+   extra {"Slider": {"Digits": 3, "GripDisplay": 1, "Interval": 0, "Max": 100.0, "Min": -100.0, "SnapCount": 0, "Value": 0.0}, "sub": []}
+#405 Number Slider "midpoint setback Z"
+   extra {"Slider": {"Digits": 3, "GripDisplay": 1, "Interval": 0, "Max": 10.0, "Min": -10.0, "SnapCount": 0, "Value": -0.75}, "sub": []}
+#406 Negative "Neg"
+   in x <= #403 Unit X(X).V
+#407 Line "Ln"
+   in A <= #388 List Item(Item).i
+   in B <= #390 Move(Move).G
+#408 Curve Middle "MidPt"
+   in C <= #407 Line(Ln).L
+#409 Move "Move"
+   in G <= #408 Curve Middle(MidPt).M
+   in T <= #410 Construct Point(Pt).Pt data=[{"vector": [0.0, 0.0, 10.0]}]
+#410 Construct Point "Pt"
+   in X <= #411 Negative(Neg).y data=[{"number": 0.0}]
+   in Y data=[{"number": 0.0}]
+   in Z <= #405 Number Slider(midpoint setback Z) data=[{"number": 0.0}]
+#411 Negative "Neg"
+   in x <= #404 Number Slider(midpoint setback X)
+#412 GROUP "top rocker control" members=3
+#413 Geometry "top rocker curve" {"WireDisplay": 2}
+   <= #402 Geometry(top rocker)
+#414 Mirror "Mirror"
+   in G <= #413 Geometry(top rocker curve)
+   in P <= #415 YZ Plane(YZ).P data=[{"plane": [0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]}]
+#415 YZ Plane "YZ"
+   in O data=[{"Coordinate": [0.0, 0.0, 0.0]}]
+#416 Join Curves "Join"
+   in C <= #414 Mirror(Mirror).G, #413 Geometry(top rocker curve) {"Access": 1}
+   in P data=[{"boolean": false}]
+#417 Extrude "Extr"
+   in B <= #416 Join Curves(Join).C
+   in D <= #418 Unit Y(Y).V
+#418 Unit Y "Y"
+   in F <= #269 Number Slider(width) data=[{"number": 1.0}] {"WireDisplay": 2}
+#419 Extrude "Extr"
+   in B <= #416 Join Curves(Join).C
+   in D <= #421 Negative(Neg).y
+#420 Brep Join "Join"
+   in B <= #417 Extrude(Extr).E, #419 Extrude(Extr).E {"Access": 1}
+#421 Negative "Neg"
+   in x <= #418 Unit Y(Y).V
+#422 Extrude "Extr"
+   in B <= #420 Brep Join(Join).B
+   in D <= #423 Unit Z(Z).V
+#423 Unit Z "Z"
+   in F <= #271 Number Slider(height) data=[{"number": 1.0}] {"WireDisplay": 2}
+#424 Solid Difference "SDiff"
+   in A <= #333 Cap Holes(Cap).B {"Access": 1}
+   in B <= #422 Extrude(Extr).E {"Access": 1}
+#425 Volume "Volume"
+   in G <= #454 Cap Holes Ex(CapEx).B
+#426 Panel "shell volume in^3" {"ScrollRatio": 0.8121432065963745, "UserText": "Double click to edit panel content\u2026"}
+   <= #425 Volume(Volume).V
+   extra {"PanelProperties": {"Colour": -1446, "DrawIndices": true, "DrawPaths": true, "Multiline": true, "SpecialCodes": false, "Stream": false, "Wrap": true}, "sub": []}
+#427 Merge "Merge"
+   in D1 <= #35 List Item(Item).i
+   in D2 <= #38 Move(Move).G
+   in D3 <= #31 Move(Move).G
+   in D4 <= #366 Move(Move).G
+   in D5 <= #370 Construct Point(Pt).Pt
+   in D6
+#428 Interpolate (t) "IntCrv(t)"
+   in V <= #427 Merge(Merge).R {"Access": 1}
+   in Ts <= #186 Negative(Neg).y data=[{"vector": [0.0, 0.0, 0.0]}]
+   in Te <= #371 Negative(Neg).y data=[{"vector": [0.0, 0.0, 0.0]}]
+   in K data=[{"number": 1}]
+#429 Split with Breps "Split"
+   in C <= #428 Interpolate (t)(IntCrv(t)).C
+   in B <= #430 Plane Origin(Pl Origin).Pl {"Access": 1}
+#430 Plane Origin "Pl Origin"
+   in B <= #431 YZ Plane(YZ).P
+   in O <= #31 Move(Move).G
+#431 YZ Plane "YZ"
+   in O data=[{"Coordinate": [0.0, 0.0, 0.0]}]
+#432 Item Index "Index"
+   in L <= #336 Deconstruct Brep(DeBrep).F {"Access": 1}
+   in i <= #435 List Item(Item).i
+#433 Merge "Merge"
+   in D1 <= #342 Item Index(Index).i
+   in D2 <= #432 Item Index(Index).i
+   in D3
+#434 Shift List "Shift"
+   in L <= #338 Sort List(Sort).A {"Access": 1}
+   in S data=[{"number": 1}]
+   in W data=[{"boolean": true}]
+#435 List Item "Item" {"BaseOutputIndex": 0}
+   in L <= #434 Shift List(Shift).L
+   in i data=[{"number": 0}]
+   in W data=[{"boolean": true}]
+#436 Stream Filter "Filter"
+   in G <= #437 Boolean Toggle(Process Shell) data=[{"number": 0}]
+   in 0 <= #439 Null Placeholder(Null).N
+   in 1 <= #433 Merge(Merge).R
+#437 Boolean Toggle "Process Shell" {"ToggleValue": true}
+#438 Stream Filter "Filter"
+   in G <= #453 Relay() data=[{"number": 0}]
+   in 0 <= #439 Null Placeholder(Null).N
+   in 1 <= #452 Relay()
+#439 Null Placeholder "Null"
+#440 Stream Filter "Filter"
+   in G <= #437 Boolean Toggle(Process Shell) data=[{"number": 0}]
+   in 0 <= #439 Null Placeholder(Null).N
+   in 1 <= #334 Shell Polysurface(ShellPsrf).S
+#441 GROUP "ENABLE THIS ONLY TO MAKE SHELL" members=1
+#442 Scribble "Scribble" {"Bold": true, "Ca": [4792.59228515625, 1628.1455078125], "Cb": [5795.80029296875, 1628.1455078125], "Cc": [5795.80029296875, 1702.6025390625], "Cd": [4792.59228515625, 1702.6025390625], "Font": "Microsoft Sans Serif", "Italic": false, "Size": 98.0, "Text": "SHELL GENERATOR"}
+#443 Geometry "canoe solid" {"WireDisplay": 2}
+   <= #424 Solid Difference(SDiff).R
+#444 GROUP "top rocker cut" members=11
+#445 Custom Preview "Preview" {"IncludeInRender": true, "ViewportFilter": ""}
+   in G <= #449 Stream Filter(Filter).S(1) {"Hidden": true}
+   in M <= #446 Colour Swatch(Swatch) data=[{"diffuse": -2252579, "emission": -12439486, "shine": 0.5, "specular": -1, "transparency": 0.0}]
+#446 Colour Swatch "Swatch" {"SwatchColor": -16766608}
+#447 GROUP "canoe shell" members=13
+#448 Boolean Toggle "Toggle" {"ToggleValue": true}
+#449 Stream Filter "Filter"
+   in G <= #448 Boolean Toggle(Toggle) data=[{"number": 0}]
+   in 0 <= #450 Null Placeholder(Null).N
+   in 1 <= #340 Geometry(BAKE ME)
+#450 Null Placeholder "Null"
+#451 GROUP "TOGGLE TO DISPLAY " members=1
+#452 Relay "" {"Access": 2}
+   <= #443 Geometry(canoe solid)
+#453 Relay "" {"Access": 2}
+   <= #437 Boolean Toggle(Process Shell)
+#454 Cap Holes Ex "CapEx"
+   in B <= #440 Stream Filter(Filter).S(1)
