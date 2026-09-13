@@ -209,15 +209,15 @@ dialog form { text-align: right; margin-top: 12px; }
 .tally { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
 .tally i { font-style: normal; font-size: 11.5px; padding: 1px 8px; border-radius: 10px; font-weight: 500; }
 .checks { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
-.checks li { display: grid; grid-template-columns: 54px 1fr; gap: 2px 10px; background: #fff; border: 1px solid var(--rule); border-left-width: 4px; border-radius: var(--radius); padding: 7px 10px; }
+.checks li { display: grid; grid-template-columns: 54px 1fr; gap: 2px 10px; background: #fff; border: 1px solid var(--rule); border-radius: var(--radius); padding: 7px 10px; }
 .checks li .st { grid-row: span 2; font: 500 11px var(--mono); text-transform: uppercase; padding-top: 2px; }
 .checks li b { font-weight: 500; }
 .checks li b small { color: var(--muted); font-weight: 400; font-family: var(--mono); margin-left: 4px; }
 .checks li p { margin: 0; color: var(--ink-2); font-size: 12px; }
-.s-pass { border-left-color: var(--good) !important; } .s-pass .st, i.s-pass { color: var(--good); } i.s-pass { background: var(--good-soft); }
-.s-warn { border-left-color: #e8a13a !important; } .s-warn .st, i.s-warn { color: var(--warn); } i.s-warn { background: var(--warn-soft); }
-.s-fail { border-left-color: var(--bad) !important; } .s-fail .st, i.s-fail { color: var(--bad); } i.s-fail { background: var(--bad-soft); }
-.s-info { border-left-color: var(--water) !important; } .s-info .st, i.s-info { color: var(--water); } i.s-info { background: var(--water-soft); }
+.checks li.s-fail { border-color: #f0bcbc; } .s-pass .st, i.s-pass { color: var(--good); } i.s-pass { background: var(--good-soft); }
+ .s-warn .st, i.s-warn { color: var(--warn); } i.s-warn { background: var(--warn-soft); }
+ .s-fail .st, i.s-fail { color: var(--bad); } i.s-fail { background: var(--bad-soft); }
+ .s-info .st, i.s-info { color: var(--water); } i.s-info { background: var(--water-soft); }
 .chart .line.m { stroke: var(--accent); }
 .chart .line.v { stroke: var(--water); }
 .chart .need { stroke: var(--bad); stroke-dasharray: 5 3; }
