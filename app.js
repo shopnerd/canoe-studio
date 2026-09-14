@@ -650,7 +650,7 @@ function renderRules() {
   const count = st => checks.filter(c => c.status === st).length;
   const S = a.slalom, c = a.coed;
   let h = stale ? `<div class="note">Showing the previous build — updating…</div>` : '';
-  h += `<div class="rules-head"><b>${R.title}</b><span>${R.finals}</span><span>${R.issued} · <a href="${R.url}" target="_blank" rel="noopener">read the RFP (PDF)</a></span>
+  h += `<div class="rules-head"><b>${R.title}</b><span>${R.finals}</span><span>${R.issued} · <a href="${R.url}" target="_blank" rel="noopener">read the RFP (PDF)</a> · <a href="learn/rules-2027.html" target="_blank" rel="noopener">plain-English guide</a></span>
     <div class="tally">${['fail', 'warn', 'pass', 'info'].filter(count).map(st => `<i class="s-${st}">${count(st)} ${st === 'info' ? 'notes' : st === 'warn' ? 'close' : st}</i>`).join('')}</div></div>`;
   h += `<ul class="checks">${checks.map(k => `<li class="s-${k.status}"><span class="st">${k.status === 'warn' ? 'close' : k.status}</span><b>${k.title}<small>§${k.ref}</small></b><p>${k.detail}</p></li>`).join('')}</ul>`;
 

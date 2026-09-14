@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Using Canoe Studio</title>
+<meta name="description" content="How to design a concrete canoe hull in Canoe Studio: the workflow, what each tab measures, sharing designs and what the model assumes.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22%3E%3Cpath d=%22M2 16 C 12 30, 28 30, 38 16 L 38 14 C 26 19, 14 19, 2 14 Z%22 fill=%22%231f2328%22/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="learn.css">
+</head>
+<body>
+<header class="bar">
+  <a class="brand" href="./"><svg viewBox="0 0 40 16" aria-hidden="true"><path d="M1 4 C 10 15, 30 15, 39 4 L 39 3 C 28 7, 12 7, 1 3 Z"/></svg>Canoe Studio <small>Learn</small></a>
+  <nav aria-label="Guides"><a href="start.html" aria-current="page">Using the app</a><a href="rules-2027.html">2027 rules</a><a href="finals-2025.html">2025 Finals</a><a href="mix.html">Mix notes</a><a href="post-tensioning.html">Post-tensioning</a></nav>
+  <a class="app" href="../">Open the app →</a>
+</header>
+<main>
+  <div class="kicker">Guide · Using the app</div>
+  <h1>Using Canoe Studio</h1>
+  <p class="lede">Canoe Studio is a browser version of the team’s Grasshopper hull script. You shape four control curves, and it lofts the hull, builds the concrete shell and mold, and checks how the boat floats, how stable it is, and whether it meets the 2027 rules.</p>
+
+  <h2>The workflow</h2>
+  <ol class="steps">
+    <li><div><b>Set the envelope.</b> In the left panel, start with <i>Hull envelope</i>: length, beam and depth. Everything else is measured inside that box.</div></li>
+    <li><div><b>Shape the curves.</b> On the <i>Curves</i> tab, drag the orange handles on the cross section, the profile (keel, stem and sheer) and the plan view. Each curve must stay inside its dashed box. That’s the same check the Grasshopper script runs, and a curve that leaves its box turns red.</div></li>
+    <li><div><b>Read the analysis.</b> About a second after you stop dragging, the <i>Analysis</i> tab updates: weight, draft, freeboard, stability and speed.</div></li>
+    <li><div><b>Check the rules.</b> The <i>Rules 2027</i> tab shows pass, close or fail for each rule the geometry can check, plus the structural load case the report requires.</div></li>
+    <li><div><b>Export.</b> <i>Build &amp; export</i> produces section templates, hot-wire templates, an offsets table, STL files and the design file.</div></li>
+  </ol>
+
+  <h2>What each tab tells you</h2>
+  <h3>Curves</h3>
+  <p>Four 2D editors: <b>cross section</b> at midship, <b>profile</b> of the bow half (keel rocker, stem and the sheer line in blue), <b>plan</b> (the gunwale seen from above), and a <b>body plan</b> of true cross-sections sliced from the finished hull. Use <i>Vertical scale</i> to exaggerate heights when a curve is hard to read. The waterline at race load is drawn once the analysis runs.</p>
+
+  <h3>Analysis</h3>
+  <ul>
+    <li><b>Hull weight</b> comes from the concrete volume × the unit weight you set in <i>Analysis inputs</i>.</li>
+    <li><b>Draft and freeboard</b> are computed at your race load: the paddlers plus the hull plus other weight. Freeboard is measured at the <i>lowest</i> point of the gunwale.</li>
+    <li><b>GM</b> is the stability number. Bigger means stiffer; zero or negative means it rolls over upright. The <b>righting-arm (GZ) curve</b> shows stability as the canoe heels, and marks where the gunwale reaches the water.</li>
+    <li><b>Form coefficients</b> (C<sub>b</sub>, C<sub>p</sub>, C<sub>m</sub>, C<sub>wp</sub>) describe how full the hull is. The <b>sectional area curve</b> shows how volume is spread from stern to bow.</li>
+    <li><b>Speed &amp; drag</b> gives theoretical hull speed and skin-friction drag only. Wave drag isn’t included, so use it to compare designs, not to predict race times.</li>
+    <li><b>Pin as baseline</b> freezes the current numbers, so every card afterwards shows the change from that design. Use it before trying an idea.</li>
+  </ul>
+
+  <h3>Rules 2027</h3>
+  <p>Hull thickness, names above water with four paddlers, the swamp test and whether the foam fits within 3 ft of the ends, concrete unit weight, reinforcement ratio and open area, and the 3-person structural load case with moment, shear, section properties, stresses and punching shear. See <a href="rules-2027.html">the rules guide</a> for what each one means.</p>
+
+  <h3>Build &amp; export</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Export</th><th>Use it for</th></tr></thead>
+    <tbody>
+      <tr><td>Section templates (SVG)</td><td>Full-size station outlines to print or laser-cut. Allowed as jigs under the mold rule.</td></tr>
+      <tr><td>Hot-wire templates (SVG)</td><td>One profile at each block joint, to guide a hot wire by hand through foam mold blocks</td></tr>
+      <tr><td>Table of offsets (CSV)</td><td>Half-breadths at 1 in waterlines: the classic boatbuilder’s table</td></tr>
+      <tr><td>Concrete shell / hull (STL)</td><td>3D models for visualizing, the cross-section display, or other software</td></tr>
+      <tr><td>Mold blocks (ZIP of STL)</td><td>Practice pieces only. 2027 rules don’t allow CNC or 3D-printed competition molds.</td></tr>
+      <tr><td>Design file (JSON)</td><td>Saving a design to reopen later with <i>Open</i></td></tr>
+    </tbody>
+  </table></div>
+
+  <h2>Sharing and saving</h2>
+  <ul>
+    <li><b>Copy link</b> puts every changed parameter into the web address. Send it and the other person opens the exact same hull.</li>
+    <li><b>Save / Open</b> writes and reads a design file. Name the design first (top left) so the files are easy to tell apart.</li>
+    <li>The app also remembers your last design in this browser automatically. <b>Reset</b> returns to the values in the original Grasshopper file, and <b>Undo</b> (Ctrl+Z) steps back.</li>
+  </ul>
+
+  <h2>What the model assumes</h2>
+  <ul>
+    <li>Fresh water. Paddlers are modeled as point weights on the centerline at the CG height you set.</li>
+    <li>Strengths (f′c and composite tensile) are placeholders until the team has cylinder and flexural test data. The structural check is only as good as those two inputs.</li>
+    <li>A few details of the original script were ambiguous and were interpreted, such as the sheer tangent and which shell faces are removed. The repository README lists them. Compare against a baked Rhino result before trusting small differences.</li>
+    <li>Analysis is an early-design estimate. The float test is the real answer.</li>
+  </ul>
+
+  <div class="next"><a href="./"><small>Back</small>All guides</a><a class="fwd" href="rules-2027.html"><small>Next</small>The 2027 rules →</a></div>
+</main>
+
+</body>
+</html>

@@ -1,0 +1,194 @@
+<!-- title: Post-Tensioning the Canoe | description: How post-tensioning a concrete canoe really works, run on real hull numbers and the 2027 rules, with an honest verdict and a safer test-beam alternative. -->
+<main>
+  <div class="kicker">Guide · Structures · default hull 210 × 30 × 18 in · 2027 rules</div>
+  <h1>Post-tensioning the canoe</h1>
+  <p class="lede">What it actually does, what it costs in complexity, and whether this hull needs it. Every hull number below comes from Canoe Studio’s model of the default design (the values in the original Grasshopper file), not from a textbook.</p>
+
+  <section class="panel verdict" aria-label="Verdict">
+    <b class="v">Not worth it in the hull. Worth building as a test beam.</b>
+    <ul>
+      <li>The hull’s bending stresses in race and transport are small, around <span class="num">40–46 psi</span>. Even with a factor of safety of 2 that’s <span class="num">~92 psi</span>, against an estimated <span class="num">~218 psi</span> cracking strength for plain lightweight concrete. Post-tensioning fixes a problem this hull doesn’t have.</li>
+      <li>The obvious tendon layout, one cable down the keel, makes the governing case <em>worse</em>: it puts the gunwales into tension.</li>
+      <li>A tendon that follows the hull’s curves pulls sideways on the thin wall hard enough to crack it (<span class="num">~1,650 psi</span>) unless ribs or thwarts take the load.</li>
+      <li>Ducts or sleeves may not pass the reinforcement rules, which would take an RFI to settle.</li>
+      <li>As a teaching project it’s excellent. A post-tensioned strip beam tested next to a plain one teaches all of it safely, and gives the Design Narrative real data.</li>
+    </ul>
+  </section>
+
+  <h2>How it works</h2>
+  <p>Concrete is strong in compression and weak in tension. A beam cracks where bending stretches it, long before the compressed side is in trouble. Prestressing squeezes the concrete <em>before</em> the load arrives, so the load has to cancel that squeeze before it can create any tension at all.</p>
+  <p><b>Post</b>-tensioning means the tendon (a steel cable, aramid cord or strand) runs through the hardened concrete, usually inside a sleeve so it can slide. After curing it gets pulled tight with a jack and locked off against a bearing plate at each end. The plates push on the concrete, and that push is the prestress. <b>Pre</b>-tensioning is the other way round: you tension the tendon in a frame, cast concrete around it, and release it once the concrete bonds. No sleeve, but the frame has to hold thousands of pounds for days.</p>
+
+  <p>The whole design comes down to adding three stress patterns across the section:</p>
+  <div class="eq">σ = − P/A &nbsp;&nbsp; ± P·e·y/I &nbsp;&nbsp; ± M·y/I</div>
+  <p><span class="num">P/A</span> is the even squeeze. <span class="num">P·e·y/I</span> is the bending the tendon adds when it sits a distance <span class="num">e</span> off the neutral axis. <span class="num">M·y/I</span> is what the paddlers, water and hull weight do. Get the first two to cancel the third on whichever face goes into tension, and you’re done. Getting that sign right is where it goes wrong.</p>
+
+  <h3>The section that governs</h3>
+  <p>The worst bending is 19 in behind midship, in the 3-person endurance slalom. Paddlers at the ends and the middle, with buoyancy concentrated under midship, bend the hull upward in the middle (hogging). The gunwales stretch and the keel squeezes.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Concrete section at x = −19 in</th><th class="r">Value</th></tr></thead>
+    <tbody>
+      <tr><td>Area of concrete (½ in wall)</td><td class="r">27.3 in²</td></tr>
+      <tr><td>Moment of inertia I</td><td class="r">833 in⁴</td></tr>
+      <tr><td>Neutral axis above the keel</td><td class="r">6.1 in</td></tr>
+      <tr><td>Distance to gunwale / to keel</td><td class="r">11.5 / 6.0 in</td></tr>
+    </tbody>
+  </table></div>
+  <p>The neutral axis sits low because most of the concrete is in the bottom, so the gunwale is almost twice as far from it as the keel. That makes the gunwale the fragile face in hogging.</p>
+
+  <h2>Does this hull need it?</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Load case</th><th class="r">Moment</th><th class="r">Max tension</th><th class="r">× FS 2</th></tr></thead>
+    <tbody>
+      <tr><td>3-person endurance slalom (RFP §5.7.1) · hogging</td><td class="r">3,333 lb·in</td><td class="r t">46 psi gunwale</td><td class="r">92 psi</td></tr>
+      <tr><td>4-person co-ed sprint · hogging</td><td class="r">2,848 lb·in</td><td class="r t">39 psi gunwale</td><td class="r">79 psi</td></tr>
+      <tr><td>Empty hull on stands 24 in from each tip, ×2 for a bump · sagging</td><td class="r">6,181 lb·in</td><td class="r t">44 psi keel</td><td class="r">89 psi</td></tr>
+    </tbody>
+  </table></div>
+
+  <figure class="chart">
+    <svg viewBox="0 0 700 210" role="img" aria-labelledby="capT capD">
+      <title id="capT">Bending tension versus cracking strength</title>
+      <desc id="capD">Service tension 39 to 46 psi, factored 79 to 92 psi, all well below an estimated 218 psi modulus of rupture.</desc>
+      <line class="gridl" x1="230" x2="230" y1="16" y2="170"/><line class="gridl" x1="330" x2="330" y1="16" y2="170"/><line class="gridl" x1="430" x2="430" y1="16" y2="170"/><line class="gridl" x1="530" x2="530" y1="16" y2="170"/><line class="gridl" x1="630" x2="630" y1="16" y2="170"/>
+      <text x="130" y="188" text-anchor="middle">0</text><text x="230" y="188" text-anchor="middle">50</text><text x="330" y="188" text-anchor="middle">100</text><text x="430" y="188" text-anchor="middle">150</text><text x="530" y="188" text-anchor="middle">200</text><text x="630" y="188" text-anchor="middle">250 psi</text>
+      <line class="axis" x1="130" x2="130" y1="16" y2="170"/>
+      <text class="lbl" x="120" y="44" text-anchor="end">Slalom</text>
+      <rect class="bar-f" x="130" y="30" width="184" height="20"/><rect class="bar-s" x="130" y="30" width="92" height="20"/>
+      <text class="lbl" x="120" y="94" text-anchor="end">Co-ed sprint</text>
+      <rect class="bar-f" x="130" y="80" width="158" height="20"/><rect class="bar-s" x="130" y="80" width="78" height="20"/>
+      <text class="lbl" x="120" y="144" text-anchor="end">Transport</text>
+      <rect class="bar-f" x="130" y="130" width="177" height="20"/><rect class="bar-s" x="130" y="130" width="88" height="20"/>
+      <line class="cap" x1="566" x2="566" y1="16" y2="170"/>
+      <text x="560" y="28" text-anchor="end" style="fill:var(--ok)">cracks ≈ 218 psi</text>
+    </svg>
+    <figcaption>Dark bar = service tension, light bar = with factor of safety 2. The cracking line uses ACI’s formula for all-lightweight concrete, 7.5·λ·√f′c with λ = 0.75 and a placeholder f′c of 1,500 psi. Swap in the team’s cylinder breaks when they have them.</figcaption>
+  </figure>
+
+  <p>Even factored, the worst case reaches less than half of what should crack plain lightweight concrete, before counting any mesh. Concrete canoes do crack, but not from global hull bending. The usual causes are drying shrinkage, sharp corners, impacts, twisting, and <em>local</em> bending of the thin wall under knees and water pressure. A tendon running the length of the boat does nothing for any of those.</p>
+
+  <h2>The three problems nobody mentions</h2>
+  <div>
+    <div class="panel">
+      <span class="tag stop">Makes it worse</span>
+      <h3>A keel tendon puts the gunwales into tension</h3>
+      <p>The natural place for a cable is down the keel: straight in plan view, easy to anchor at the stems. But the keel is 5.5 in below the neutral axis, so a <span class="num">1,400 lb</span> tendon there bends the hull upward in the middle, the same direction as the slalom load.</p>
+      <figure class="chart">
+        <svg viewBox="0 0 700 250" role="img" aria-labelledby="sbT sbD">
+          <title id="sbT">Stress blocks for a keel-only tendon</title>
+          <desc id="sbD">Even squeeze of 51 psi, plus tendon bending of 106 psi tension at the gunwale, plus factored slalom of 92 psi tension, adds up to 146 psi tension at the gunwale.</desc>
+          <text class="big" x="10" y="22">Gunwale</text><text class="big" x="10" y="222">Keel</text>
+          <line class="axis" x1="10" x2="690" y1="150" y2="150" style="stroke-dasharray:4 4;opacity:.45"/>
+          <text x="690" y="144" text-anchor="end">neutral axis</text>
+          <g transform="translate(150,0)">
+            <line class="axis" x1="0" x2="0" y1="30" y2="210"/>
+            <rect class="cfill" x="-26" y="30" width="26" height="180"/>
+            <text x="0" y="244" text-anchor="middle">P/A</text><text x="-30" y="120" text-anchor="end" class="c">−51</text>
+          </g>
+          <text class="big" x="205" y="126">+</text>
+          <g transform="translate(290,0)">
+            <line class="axis" x1="0" x2="0" y1="30" y2="210"/>
+            <polygon class="tfill" points="0,30 53,30 0,150"/>
+            <polygon class="cfill" points="0,150 0,210 -27,210"/>
+            <text x="0" y="244" text-anchor="middle">P·e·y/I</text><text x="58" y="44" class="t">+106</text><text x="-32" y="206" text-anchor="end" class="c">−55</text>
+          </g>
+          <text class="big" x="365" y="126">+</text>
+          <g transform="translate(440,0)">
+            <line class="axis" x1="0" x2="0" y1="30" y2="210"/>
+            <polygon class="tfill" points="0,30 46,30 0,150"/>
+            <polygon class="cfill" points="0,150 0,210 -24,210"/>
+            <text x="0" y="244" text-anchor="middle">slalom × FS</text><text x="51" y="44" class="t">+92</text><text x="-29" y="206" text-anchor="end" class="c">−48</text>
+          </g>
+          <text class="big" x="515" y="126">=</text>
+          <g transform="translate(610,0)">
+            <line class="axis" x1="0" x2="0" y1="30" y2="210"/>
+            <polygon class="tfill" points="0,30 73,30 0,118"/>
+            <polygon class="cfill" points="0,118 0,210 -77,210"/>
+            <text x="0" y="244" text-anchor="middle">total</text><text x="78" y="44" class="t">+146</text><text x="-80" y="206" text-anchor="end" class="c">−154</text>
+          </g>
+        </svg>
+        <figcaption>Red = tension, blue = compression, psi. Without the tendon the gunwale sees +92 psi. With it, +146 psi. The prestress piled more compression onto the keel, which didn’t need it, and more tension onto the gunwale, which did.</figcaption>
+      </figure>
+      <p>To help the hogging case the tendon has to sit <em>above</em> the neutral axis, up toward the gunwales. That leads straight to problem two.</p>
+    </div>
+
+    <div class="panel">
+      <span class="tag stop">Cracks the wall</span>
+      <h3>A curved tendon pushes sideways</h3>
+      <p>A tensioned cable always tries to straighten. Run it along the gunwale, which bows out 15 in to full beam over the 210 in length, and it pulls the gunwale inward along its whole length:</p>
+      <div class="eq">w = 8·P·sag / L² = 8 × 1,400 × 15 / 210² ≈ 3.8 lb per inch, inward, each side</div>
+      <figure class="chart">
+        <svg viewBox="0 0 700 170" role="img" aria-labelledby="spT spD">
+          <title id="spT">Plan view of a gunwale tendon pulling inward</title>
+          <desc id="spD">The tendon follows the curved gunwale and its tension creates inward force along both sides.</desc>
+          <path class="hull" d="M20,85 C 170,8 530,8 680,85 C 530,162 170,162 20,85 Z"/>
+          <path class="tendon" d="M28,85 C 176,16 524,16 672,85"/>
+          <path class="tendon" d="M28,85 C 176,154 524,154 672,85"/>
+          <g>
+            <path class="arrow" d="M200,34 L200,56"/><polygon class="ahead" points="195,54 205,54 200,63"/>
+            <path class="arrow" d="M350,26 L350,48"/><polygon class="ahead" points="345,46 355,46 350,55"/>
+            <path class="arrow" d="M500,34 L500,56"/><polygon class="ahead" points="495,54 505,54 500,63"/>
+            <path class="arrow" d="M200,136 L200,114"/><polygon class="ahead" points="195,116 205,116 200,107"/>
+            <path class="arrow" d="M350,144 L350,122"/><polygon class="ahead" points="345,124 355,124 350,115"/>
+            <path class="arrow" d="M500,136 L500,114"/><polygon class="ahead" points="495,116 505,116 500,107"/>
+          </g>
+          <text x="350" y="92" text-anchor="middle">3.8 lb/in inward on each side</text>
+          <text x="20" y="164">stern</text><text x="680" y="164" text-anchor="end">bow</text>
+        </svg>
+        <figcaption>Plan view. Steel lines = tendons following the gunwales.</figcaption>
+      </figure>
+      <p>With nothing across the boat to resist it, each side wall has to carry that load down to the bilge as a cantilever: <span class="num">3.8 × 18 in ≈ 69 lb·in</span> per inch of wall. A ½ in wall resists bending with <span class="num">t²/6 = 0.042 in³</span> per inch, so the stress is <b class="t">~1,650 psi</b>. That’s about 7.5× the cracking strength. Thwarts or ribs every few feet can take the pull, but then you’re designing a frame as well as a hull. Any tendon that follows a curve does this, including one set at neutral-axis height along the sides.</p>
+      <p>The keel has a milder, actually useful version of the same effect. A keel tendon following the <span class="num">3 in</span> rocker pushes up on the hull with about <span class="num">181 lb</span> in total, roughly the hull’s own <span class="num">164 lb</span> weight. That’s load balancing: the curve cancels the dead weight. It’s the most elegant idea in prestressed design, and a good one for the team to see in numbers.</p>
+    </div>
+
+    <div class="panel">
+      <span class="tag work">Needs an RFI</span>
+      <h3>Sleeves, anchors and the rules</h3>
+      <p>The 2027 rules allow tendons: pieces under ½ in wide used for pre- or post-tensioning. Bearing plates are allowed within 2 ft of the bow and stern and capped at ¼ in thick (Exhibit 5). Three things get in the way:</p>
+      <ul>
+        <li><b>The sleeve.</b> Exhibit 5 counts anything that isn’t concrete or flotation as reinforcement, and reinforcement layers need ≥ 40% open area. A plastic tube has none. Whether a duct counts is exactly the kind of question an RFI is for. Pre-tensioning avoids the sleeve but needs a hand-built frame strong enough to hold the tendons during the cure.</li>
+        <li><b>Thickness.</b> A ⅛ in cable plus two mesh layers (~0.04 in each) is ~41% of a ½ in wall, under the 50% limit, but only just, and only if there’s no sleeve adding diameter.</li>
+        <li><b>The anchor end.</b> A 1.5 in plate carrying 1,400 lb bears at <span class="num">622 psi</span>, under a rough allowable of <span class="num">0.7·f′c ≈ 1,050 psi</span>. The problem is behind the plate: the force spreads out and splits the concrete (bursting). A ½ in shell at a narrow stem has no room for that, so the anchors need solid end blocks. Those can double as the foam bulkheads, which the rules also keep within 3 ft of the ends.</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2>What it would take anyway</h2>
+  <p>If the team goes ahead, this is the real shape of it. The candidate tendon is ⅛ in 7×19 galvanized wire rope: about 2,000 lb breaking strength, locked off at 70%, so <span class="num">1,400 lb</span>.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Item</th><th class="r">Number</th><th>What it means</th></tr></thead>
+    <tbody>
+      <tr><td>Even prestress to erase every factored tension</td><td class="r">2,510 lb</td><td>Two tendons at 1,400 lb, if the losses were zero</td></tr>
+      <tr><td>Stretch to reach 1,400 lb over 186 in</td><td class="r">3.2 in</td><td>That’s how far you pull. You measure this to check the force.</td></tr>
+      <tr><td>Anchor slip of 1/16 in at lock-off</td><td class="r">−2%</td><td>Short tendons feel slip hard</td></tr>
+      <tr><td>Shrinkage of the concrete (~1,000 µε)</td><td class="r">−6%</td><td>The hull shortens and the tendon relaxes with it</td></tr>
+      <tr><td>Creep under the prestress</td><td class="r">−2%</td><td>Small, because the prestress is small</td></tr>
+      <tr><td>Wire rope bedding in (~0.5% of length)</td><td class="r t">−29%</td><td>The big one. Pre-stretch the rope before casting, or expect to lose a third of the force.</td></tr>
+      <tr><td>Stored energy per tendon, ½·P·δ</td><td class="r">≈ 185 ft·lb</td><td>Like dropping a 10 lb weight from 18 ft. A failed crimp turns the cable into a whip.</td></tr>
+    </tbody>
+  </table></div>
+  <p>Realistically that’s three or four pre-stretched tendons, sleeves the rules may not allow, two solid anchor blocks, a calibrated way to pull and measure 3 in of stretch, and a safety plan for standing near 1,400 lb cables. All of it goes into the drawings and Design Narrative, which the RFP asks for when prestress is used: tendon layout, anchorage locations, timing, and how the force was applied.</p>
+
+  <h2>The better way to learn it</h2>
+  <p><span class="tag go">Recommended</span></p>
+  <p>Put the curiosity into a test beam instead of the boat. It teaches every concept above, costs a weekend, and gives the Design Narrative measured data. Judges tend to value that more than a feature.</p>
+  <ol class="steps">
+    <li><div><b>Cast three strip beams</b> from the team mix, e.g. ½ in × 4 in × 30 in: plain, mesh only, and mesh plus one post-tensioned cable in a sleeve, placed off-center on purpose.</div></li>
+    <li><div><b>Pre-stretch and tension the cable</b> with a turnbuckle and a luggage or crane scale. Measure the stretch, check it against <span class="num">P·L/(A·E)</span>, then watch the force drop over a week of drying.</div></li>
+    <li><div><b>Load all three in 4-point bending</b> and record the load at first crack. Then flip the prestressed beam over and repeat. Watching the eccentric tendon <em>lower</em> the cracking load in one direction is problem one, in their hands.</div></li>
+    <li><div><b>Write it up</b> as a design decision with numbers: why the hull doesn’t need post-tensioning, and the test that proves it.</div></li>
+  </ol>
+
+  <div class="foot">
+    <b>Where the numbers come from.</b> Hull geometry, section properties, moments and the stress blocks come from Canoe Studio’s default design (62 pcf concrete, ½ in wall, 170 lb paddlers); open the app to rerun them for your hull. The rest are assumptions to replace with real data:
+    <ul>
+      <li>f′c = 1,500 psi and λ = 0.75 are placeholders. ACI’s modulus-of-rupture and modulus formulas are only calibrated down to about 90 pcf concrete, so treat 218 psi as an estimate for a lighter mix.</li>
+      <li>Wire rope values are typical catalog numbers: breaking strength ~2,000 lb, metallic area ~0.0063 in², modulus ~13,000 ksi, bedding-in 0.5%. Use the actual datasheet.</li>
+      <li>Shrinkage (1,000 µε) and creep coefficient (2.5) are typical for high-paste lightweight mortars, not measured.</li>
+      <li>The side-wall check treats the wall as a cantilever with no thwarts, which is the worst case and a first estimate.</li>
+      <li>Rules: 2026–27 ASCE Concrete Canoe RFP (issued Sept 8, 2026), §5.7.1 and Exhibit 5. Calculation script: <code>test/pt-study.mjs</code> in the repository.</li>
+    </ul>
+  </div>
+
+  <div class="next"><a href="mix.html"><small>Previous</small>← Mix &amp; troweling notes</a><a class="fwd" href="./"><small>Back to</small>All guides →</a></div>
+</main>
