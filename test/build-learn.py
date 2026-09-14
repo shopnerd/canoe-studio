@@ -9,6 +9,7 @@ NAV = [
     ('finals-2025.html', '2025 Finals'),
     ('mix.html', 'Mix notes'),
     ('post-tensioning.html', 'Post-tensioning'),
+    ('season-report.html', 'Season report'),
 ]
 FAVICON = "data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22%3E%3Cpath d=%22M2 16 C 12 30, 28 30, 38 16 L 38 14 C 26 19, 14 19, 2 14 Z%22 fill=%22%231f2328%22/%3E%3C/svg%3E"
 

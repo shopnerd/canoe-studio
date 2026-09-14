@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Season Report Template</title>
+<meta name="description" content="A fillable after-competition report for the concrete canoe team: scorecard against the leader, design predictions vs. measurements, races, judges' feedback, and lessons for next year.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22%3E%3Cpath d=%22M2 16 C 12 30, 28 30, 38 16 L 38 14 C 26 19, 14 19, 2 14 Z%22 fill=%22%231f2328%22/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="learn.css">
+</head>
+<body>
+<header class="bar">
+  <a class="brand" href="./"><svg viewBox="0 0 40 16" aria-hidden="true"><path d="M1 4 C 10 15, 30 15, 39 4 L 39 3 C 28 7, 12 7, 1 3 Z"/></svg>Canoe Studio <small>Learn</small></a>
+  <nav aria-label="Guides"><a href="start.html">Using the app</a><a href="rules-2027.html">2027 rules</a><a href="finals-2025.html">2025 Finals</a><a href="mix.html">Mix notes</a><a href="post-tensioning.html">Post-tensioning</a><a href="season-report.html" aria-current="page">Season report</a></nav>
+  <a class="app" href="../">Open the app →</a>
+</header>
+<main>
+  <div class="kicker">Template · Fill in after each competition</div>
+  <h1>Season report</h1>
+  <p class="lede">The same questions every year, so each team can see what changed and why. Fill it in within a week of the Symposium and again after Finals, while the judges’ comments and race times are fresh.</p>
+
+  <div class="panel">
+    <p style="margin:0"><b>How to use it.</b> Type straight into the page. It saves in this browser as you go, and totals and gaps calculate themselves. When you’re done, <b>Download</b> a Markdown file (it opens in Google Docs or any text editor) and put it in the team Drive next to last year’s. Nothing you type is sent anywhere.</p>
+  </div>
+
+  <div class="rep-tools" role="toolbar" aria-label="Report actions">
+    <button type="button" id="btnDownload">Download report (.md)</button>
+    <button type="button" id="btnPrint">Print / save PDF</button>
+    <label class="btnlike">Open saved report<input type="file" id="fileOpen" accept=".md,.txt,text/markdown" hidden></label>
+    <button type="button" id="btnClear" class="quiet">Clear all</button>
+    <span id="saved" class="saved" aria-live="polite"></span>
+  </div>
+
+  <form id="report" autocomplete="off">
+    <section class="rep" data-title="Overview">
+      <h2>1 · Overview</h2>
+      <div class="grid2">
+        <label class="field">Competition<select id="f_event"><option>Student Symposium</option><option>Society-wide Finals</option><option>Both (season summary)</option></select></label>
+        <label class="field">Competition year<input id="f_year" type="text" placeholder="2027"></label>
+        <label class="field">Canoe name<input id="f_canoe" type="text"></label>
+        <label class="field">Overall place<input id="f_place" type="text" placeholder="e.g. 4th of 17"></label>
+        <label class="field">Report written by (roles are fine)<input id="f_authors" type="text" placeholder="Captain, mix lead, hull lead"></label>
+        <label class="field">Date<input id="f_date" type="date"></label>
+      </div>
+      <label class="field">The season in two sentences<textarea id="f_summary" rows="2" placeholder="What went right, what cost us the most."></textarea></label>
+    </section>
+
+    <section class="rep" data-title="Scorecard">
+      <h2>2 · Scorecard</h2>
+      <p class="help">Points per the 2027 RFP (§10). Every event is ranked against the other teams, so the <b>gap to the leader</b> shows where points were really lost.</p>
+      <div class="table-wrap"><table class="rep-table" id="t_score">
+        <thead><tr><th>Category</th><th class="r">Max</th><th class="r">Our points</th><th class="r">Leader’s points</th><th class="r">Gap</th><th class="r">Our rank</th></tr></thead>
+        <tbody>
+          <tr><td>Project Proposal (narrative, drawings, calcs)</td><td class="r">30</td><td><input id="s1_our" inputmode="decimal"></td><td><input id="s1_top" inputmode="decimal"></td><td class="r calc" data-gap="s1"></td><td><input id="s1_rank" inputmode="numeric"></td></tr>
+          <tr><td>Presentation &amp; Technical Interview</td><td class="r">25</td><td><input id="s2_our" inputmode="decimal"></td><td><input id="s2_top" inputmode="decimal"></td><td class="r calc" data-gap="s2"></td><td><input id="s2_rank" inputmode="numeric"></td></tr>
+          <tr><td>Final Product Prototype (canoe, display, cross-section)</td><td class="r">25</td><td><input id="s3_our" inputmode="decimal"></td><td><input id="s3_top" inputmode="decimal"></td><td class="r calc" data-gap="s3"></td><td><input id="s3_rank" inputmode="numeric"></td></tr>
+          <tr><td>Race Demonstrations (four events)</td><td class="r">20</td><td><input id="s4_our" inputmode="decimal"></td><td><input id="s4_top" inputmode="decimal"></td><td class="r calc" data-gap="s4"></td><td><input id="s4_rank" inputmode="numeric"></td></tr>
+          <tr class="total"><td>Total</td><td class="r">100</td><td class="r calc" data-sum="our"></td><td class="r calc" data-sum="top"></td><td class="r calc" data-sum="gap"></td><td></td></tr>
+        </tbody>
+      </table></div>
+      <label class="field">Deductions and penalties (what, and how many units)<textarea id="f_deductions" rows="2"></textarea></label>
+    </section>
+
+    <section class="rep" data-title="Predicted vs. measured">
+      <h2>3 · Predicted vs. measured</h2>
+      <p class="help">“Predicted” comes from Canoe Studio and the mix sheets; “measured” from the weigh-in, calipers, float test and lab. Big gaps are the most useful thing in this report: they show which assumptions to fix next year.</p>
+      <div class="table-wrap"><table class="rep-table" id="t_pred">
+        <thead><tr><th>Quantity</th><th>Unit</th><th class="r">Predicted</th><th class="r">Measured</th><th class="r">Difference</th></tr></thead>
+        <tbody>
+          <tr><td>Canoe weight</td><td>lb</td><td><input id="p1_pred" inputmode="decimal"></td><td><input id="p1_meas" inputmode="decimal"></td><td class="r calc" data-diff="p1"></td></tr>
+          <tr><td>Maximum wall thickness</td><td>in</td><td><input id="p2_pred" inputmode="decimal"></td><td><input id="p2_meas" inputmode="decimal"></td><td class="r calc" data-diff="p2"></td></tr>
+          <tr><td>Length · beam · depth</td><td>in</td><td><input id="p3_pred"></td><td><input id="p3_meas"></td><td class="r">—</td></tr>
+          <tr><td>Freeboard, 4 paddlers, lowest point</td><td>in</td><td><input id="p4_pred" inputmode="decimal"></td><td><input id="p4_meas" inputmode="decimal"></td><td class="r calc" data-diff="p4"></td></tr>
+          <tr><td>Draft, 4 paddlers</td><td>in</td><td><input id="p5_pred" inputmode="decimal"></td><td><input id="p5_meas" inputmode="decimal"></td><td class="r calc" data-diff="p5"></td></tr>
+          <tr><td>Oven-dried unit weight, structural mix</td><td>pcf</td><td><input id="p6_pred" inputmode="decimal"></td><td><input id="p6_meas" inputmode="decimal"></td><td class="r calc" data-diff="p6"></td></tr>
+          <tr><td>Oven-dried unit weight, second mix</td><td>pcf</td><td><input id="p7_pred" inputmode="decimal"></td><td><input id="p7_meas" inputmode="decimal"></td><td class="r calc" data-diff="p7"></td></tr>
+          <tr><td>Compressive strength (age)</td><td>psi</td><td><input id="p8_pred" inputmode="decimal"></td><td><input id="p8_meas" inputmode="decimal"></td><td class="r calc" data-diff="p8"></td></tr>
+          <tr><td>Composite flexural strength</td><td>psi</td><td><input id="p9_pred" inputmode="decimal"></td><td><input id="p9_meas" inputmode="decimal"></td><td class="r calc" data-diff="p9"></td></tr>
+        </tbody>
+      </table></div>
+      <label class="field">Canoe Studio design link (Copy link in the app)<input id="f_designlink" type="url" placeholder="https://shopnerd.github.io/canoe-studio/#p=…"></label>
+    </section>
+
+    <section class="rep" data-title="Flotation and freeboard">
+      <h2>4 · Flotation &amp; freeboard</h2>
+      <div class="grid2">
+        <label class="field">Swamp test<select id="f_swamp"><option value="">—</option><option>Passed first try</option><option>Passed after adjustment</option><option>Failed; foam added</option><option>Failed</option></select></label>
+        <label class="field">Foam in end bulkheads (ft³, per end)<input id="f_foam" type="text"></label>
+        <label class="field">Names fully above water with 4 paddlers?<select id="f_names"><option value="">—</option><option>Yes</option><option>No: 30 s penalty</option><option>Not checked</option></select></label>
+        <label class="field">Did it take on water in any race?<select id="f_water"><option value="">—</option><option>No</option><option>A little</option><option>Yes, affected the race</option><option>Swamped</option></select></label>
+      </div>
+      <label class="field">What happened, and why<textarea id="f_float_notes" rows="3"></textarea></label>
+    </section>
+
+    <section class="rep" data-title="Races">
+      <h2>5 · Races</h2>
+      <p class="help">Race points come from both placing and how close the time is to the fastest team, so record both times.</p>
+      <div class="table-wrap"><table class="rep-table" id="t_race">
+        <thead><tr><th>Event</th><th class="r">Our time (m:ss)</th><th class="r">Fastest (m:ss)</th><th class="r">Behind</th><th class="r">Place</th><th>Penalties / notes</th></tr></thead>
+        <tbody>
+          <tr><td>Co-ed slalom / endurance slalom</td><td><input id="r1_our" placeholder="3:42"></td><td><input id="r1_top"></td><td class="r calc" data-race="r1"></td><td><input id="r1_place"></td><td><input id="r1_note"></td></tr>
+          <tr><td>Women’s sprint</td><td><input id="r2_our"></td><td><input id="r2_top"></td><td class="r calc" data-race="r2"></td><td><input id="r2_place"></td><td><input id="r2_note"></td></tr>
+          <tr><td>Men’s sprint</td><td><input id="r3_our"></td><td><input id="r3_top"></td><td class="r calc" data-race="r3"></td><td><input id="r3_place"></td><td><input id="r3_note"></td></tr>
+          <tr><td>Co-ed sprint (heat / final)</td><td><input id="r4_our"></td><td><input id="r4_top"></td><td class="r calc" data-race="r4"></td><td><input id="r4_place"></td><td><input id="r4_note"></td></tr>
+        </tbody>
+      </table></div>
+      <div class="grid2">
+        <label class="field">Hours of on-water practice before competition<input id="f_practice" type="text"></label>
+        <label class="field">How did the hull handle (tracking, turning, stability)?<input id="f_handling" type="text"></label>
+      </div>
+      <label class="field">What would make us faster: boat, paddlers, or turns?<textarea id="f_race_notes" rows="2"></textarea></label>
+    </section>
+
+    <section class="rep" data-title="Judges' feedback">
+      <h2>6 · Judges’ feedback</h2>
+      <p class="help">Write down what the judges actually said or wrote, before it gets softened in memory.</p>
+      <label class="field">Proposal: praised / cost points<textarea id="j_prop" rows="2"></textarea></label>
+      <label class="field">Presentation &amp; interview: praised / cost points / questions we struggled with<textarea id="j_pres" rows="2"></textarea></label>
+      <label class="field">Final product: canoe finish, display, cross-section<textarea id="j_prod" rows="2"></textarea></label>
+    </section>
+
+    <section class="rep" data-title="Build and finish">
+      <h2>7 · Build &amp; finish</h2>
+      <div class="grid2">
+        <label class="field">Interior finish, honest rating<select id="b_int"><option value="">—</option><option>5 · smooth, no visible texture</option><option>4 · minor texture</option><option>3 · visibly bumpy in places</option><option>2 · bumpy throughout</option><option>1 · rough, lost points</option></select></label>
+        <label class="field">Exterior finish rating<select id="b_ext"><option value="">—</option><option>5 · smooth</option><option>4 · minor texture</option><option>3 · visible lumps</option><option>2 · lumpy</option><option>1 · rough</option></select></label>
+        <label class="field">Largest aggregate in the final (finish) layer<input id="b_topsize" type="text" placeholder="e.g. 0.5 mm glass bubbles / 2 mm Poraver"></label>
+        <label class="field">Hours spent sanding (and where)<input id="b_sand" type="text"></label>
+        <label class="field">Mold: material and method<input id="b_mold" type="text"></label>
+        <label class="field">Cracks, repairs, tape at durability check<input id="b_cracks" type="text"></label>
+      </div>
+      <label class="field">Placement day: what went wrong with workability, timing or thickness control?<textarea id="b_place" rows="3"></textarea></label>
+    </section>
+
+    <section class="rep" data-title="Mix">
+      <h2>8 · Mix</h2>
+      <label class="field">Final mixes: binder, aggregates (with sizes), admixtures, fibers<textarea id="m_final" rows="3"></textarea></label>
+      <label class="field">How we got from the baseline mix to the final one (tests run, what changed)<textarea id="m_path" rows="3"></textarea></label>
+      <label class="field">Rule issues or RFIs (unit weight, cement limits, materials notebook)<textarea id="m_rules" rows="2"></textarea></label>
+    </section>
+
+    <section class="rep" data-title="Lessons for next year">
+      <h2>9 · Lessons for next year</h2>
+      <div class="grid3">
+        <label class="field">Keep doing<textarea id="l_keep" rows="4" placeholder="1.&#10;2.&#10;3."></textarea></label>
+        <label class="field">Change<textarea id="l_change" rows="4" placeholder="1.&#10;2.&#10;3."></textarea></label>
+        <label class="field">Try<textarea id="l_try" rows="4" placeholder="1.&#10;2.&#10;3."></textarea></label>
+      </div>
+      <label class="field">If next year’s captain reads only one sentence, it should be<textarea id="l_one" rows="2"></textarea></label>
+      <label class="field">Where the files live (Drive folder, photos, mix sheets, design file)<input id="l_files" type="text"></label>
+    </section>
+  </form>
+
+  <div class="next"><a href="post-tensioning.html"><small>Previous</small>← Post-tensioning</a><a class="fwd" href="./"><small>Back to</small>All guides →</a></div>
+</main>
+
+<style>
+.rep-tools { position: sticky; top: 50px; z-index: 5; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; background: var(--paper); padding: 12px 0; margin-top: 20px; border-bottom: 1px solid var(--rule); }
+.rep-tools button, .rep-tools .btnlike { font: inherit; font-size: 14.5px; border: 1px solid var(--rule-2); background: #fff; color: var(--ink); padding: 6px 12px; border-radius: 6px; cursor: pointer; }
+.rep-tools button:hover, .rep-tools .btnlike:hover { border-color: var(--ink-2); }
+.rep-tools #btnDownload { background: var(--ink); color: #fff; border-color: var(--ink); }
+.rep-tools .quiet { border-color: transparent; background: transparent; color: var(--muted); }
+.saved { font: 500 12.5px var(--mono); color: var(--good); margin-left: auto; }
+.rep h2 { margin-top: 44px; }
+.help { color: var(--ink-2); font-size: 15px; }
+.field { display: flex; flex-direction: column; gap: 5px; font-size: 14.5px; font-weight: 500; color: var(--ink); margin-top: 14px; }
+.field input, .field select, .field textarea, .rep-table input { font: 400 15px/1.45 var(--sans); color: var(--ink); background: #fff; border: 1px solid var(--rule-2); border-radius: 5px; padding: 7px 9px; width: 100%; }
+.field textarea { resize: vertical; min-height: 44px; overflow: hidden; }
+.field input:focus, .field select:focus, .field textarea:focus, .rep-table input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px #fbe3d6; }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 0 18px; }
+.grid3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0 18px; }
+.rep-table { min-width: 640px; }
+.rep-table td { vertical-align: middle; padding: 6px 8px; }
+.rep-table input { padding: 5px 7px; font-family: var(--mono); font-size: 14px; text-align: right; }
+.rep-table td:last-child input, #t_pred input#p3_pred, #t_pred input#p3_meas { text-align: left; font-family: var(--sans); }
+.rep-table .calc { font-family: var(--mono); color: var(--ink-2); }
+.rep-table .calc.neg { color: var(--bad); }
+.rep-table tr.total td { font-weight: 600; border-top: 2px solid var(--ink); }
+@media print {
+  .rep-tools, .next, .panel { display: none; }
+  .field input, .field select, .field textarea, .rep-table input { border: 0; border-bottom: 1px solid #bbb; border-radius: 0; padding: 2px 0; }
+  .rep { break-inside: avoid-page; }
+}
+</style>
+
+<script>
+(() => {
+  const KEY = 'canoe-season-report-v1';
+  const form = document.getElementById('report');
+  const fields = [...form.querySelectorAll('input, select, textarea')];
+  const $ = id => document.getElementById(id);
+  const num = v => { const n = parseFloat(String(v).replace(/[^0-9.\-]/g, '')); return isFinite(n) ? n : null; };
+  const secs = v => { const m = String(v).trim().match(/^(\d+):(\d{1,2}(?:\.\d+)?)$/); if (m) return +m[1] * 60 + +m[2]; const n = num(v); return n; };
+  const fmt = (n, d = 1) => n === null || !isFinite(n) ? '' : (Math.round(n * 10 ** d) / 10 ** d).toString();
+
+  function grow(t) { t.style.height = 'auto'; t.style.height = t.scrollHeight + 2 + 'px'; }
+
+  function recalc() {
+    let our = 0, top = 0, anyOur = false, anyTop = false;
+    for (const k of ['s1', 's2', 's3', 's4']) {
+      const o = num($(k + '_our').value), t = num($(k + '_top').value);
+      const cell = form.querySelector(`[data-gap="${k}"]`);
+      cell.textContent = o !== null && t !== null ? fmt(t - o) : '';
+      if (o !== null) { our += o; anyOur = true; }
+      if (t !== null) { top += t; anyTop = true; }
+    }
+    form.querySelector('[data-sum="our"]').textContent = anyOur ? fmt(our) : '';
+    form.querySelector('[data-sum="top"]').textContent = anyTop ? fmt(top) : '';
+    form.querySelector('[data-sum="gap"]').textContent = anyOur && anyTop ? fmt(top - our) : '';
+    form.querySelectorAll('[data-diff]').forEach(cell => {
+      const k = cell.dataset.diff, p = num($(k + '_pred').value), m = num($(k + '_meas').value);
+      if (p === null || m === null) { cell.textContent = ''; return; }
+      const d = m - p;
+      cell.textContent = (d > 0 ? '+' : '') + fmt(d, 2) + (p ? `  (${d > 0 ? '+' : ''}${fmt(100 * d / p, 0)}%)` : '');
+    });
+    form.querySelectorAll('[data-race]').forEach(cell => {
+      const k = cell.dataset.race, o = secs($(k + '_our').value), t = secs($(k + '_top').value);
+      if (o === null || t === null || !t) { cell.textContent = ''; return; }
+      cell.textContent = `+${fmt(o - t, 1)} s (${fmt(100 * (o - t) / t, 0)}%)`;
+    });
+  }
+
+  function save() {
+    const data = Object.fromEntries(fields.map(f => [f.id, f.value]));
+    try { localStorage.setItem(KEY, JSON.stringify(data)); $('saved').textContent = 'Saved in this browser'; } catch (e) { $('saved').textContent = 'Not saved: browser storage is blocked. Download to keep it.'; }
+  }
+  function load(data) { fields.forEach(f => { if (data[f.id] !== undefined) f.value = data[f.id]; }); form.querySelectorAll('textarea').forEach(grow); recalc(); }
+
+  try { const s = JSON.parse(localStorage.getItem(KEY) || 'null'); if (s) load(s); } catch (e) { /* no storage */ }
+  let t = 0;
+  form.addEventListener('input', e => { if (e.target.tagName === 'TEXTAREA') grow(e.target); recalc(); clearTimeout(t); t = setTimeout(save, 400); });
+  form.addEventListener('change', () => { recalc(); save(); });
+  form.querySelectorAll('textarea').forEach(grow);
+  recalc();
+
+  // ── Markdown export: human-readable, plus a hidden data block so the file can be reopened here ──
+  function toMarkdown() {
+    const val = f => (f.tagName === 'SELECT' ? f.value : f.value).trim();
+    const title = `Season report — ${$('f_canoe').value || 'canoe'} — ${$('f_event').value} ${$('f_year').value}`.trim();
+    let md = `# ${title}\n`;
+    form.querySelectorAll('section.rep').forEach(sec => {
+      md += `\n## ${sec.dataset.title}\n\n`;
+      sec.querySelectorAll('.field, table').forEach(el => { // document order
+        if (el.tagName === 'TABLE') {
+          const rows = [...el.querySelectorAll('tr')].map(tr => [...tr.children].map(c => { const i = c.querySelector('input'); return (i ? i.value : c.textContent).trim().replace(/\|/g, '/') || ' '; }));
+          md += `| ${rows[0].join(' | ')} |\n| ${rows[0].map(() => '---').join(' | ')} |\n` + rows.slice(1).map(r => `| ${r.join(' | ')} |`).join('\n') + '\n\n';
+          return;
+        }
+        const f = el.querySelector('input, select, textarea');
+        const label = el.childNodes[0].textContent.trim();
+        const v = val(f);
+        md += v.includes('\n') ? `**${label}:**\n\n${v}\n\n` : `**${label}:** ${v || '—'}\n\n`;
+      });
+    });
+    const data = Object.fromEntries(fields.map(f => [f.id, f.value]));
+    md += `\n<!-- canoe-season-report ${btoa(unescape(encodeURIComponent(JSON.stringify(data))))} -->\n`;
+    return md;
+  }
+  $('btnDownload').addEventListener('click', () => {
+    const name = `season-report-${($('f_year').value || 'year')}-${($('f_event').value || '').toLowerCase().replace(/[^a-z]+/g, '-')}.md`.replace(/-+/g, '-');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([toMarkdown()], { type: 'text/markdown' }));
+    a.download = name; document.body.append(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  });
+  $('btnPrint').addEventListener('click', () => window.print());
+  $('btnClear').addEventListener('click', () => {
+    if (!confirm('Clear every field in this report? Download it first if you want to keep it.')) return;
+    fields.forEach(f => { f.value = f.tagName === 'SELECT' ? f.options[0].value : ''; });
+    form.querySelectorAll('textarea').forEach(grow); recalc(); save();
+  });
+  $('fileOpen').addEventListener('change', async e => {
+    const file = e.target.files[0]; if (!file) return;
+    const m = (await file.text()).match(/<!-- canoe-season-report ([A-Za-z0-9+/=]+) -->/);
+    if (!m) { alert('That file wasn’t downloaded from this page, so it can’t be reopened here.'); return; }
+    try { load(JSON.parse(decodeURIComponent(escape(atob(m[1]))))); save(); } catch (err) { alert('Couldn’t read that report file.'); }
+    e.target.value = '';
+  });
+})();
+</script>
+
+</body>
+</html>
