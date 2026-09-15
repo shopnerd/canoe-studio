@@ -781,6 +781,7 @@ function renderBuild() {
     <tr><td>Overall size</td><td>${fmt(bb.hi[0] - bb.lo[0], 1)} × ${fmt(bb.hi[1] - bb.lo[1], 1)} × ${fmt(bb.hi[2] - bb.lo[2], 1)} in</td><td></td></tr>
   </table>`;
 
+  h += printPanelHTML();
   h += `<h3>Export</h3>
   <div class="opts">
     <label class="inline">STL units <select id="stlUnits"><option value="in">inches (as modeled)</option><option value="mm">millimetres</option></select></label>
@@ -800,7 +801,96 @@ function renderBuild() {
   $('#stlUnits').addEventListener('change', e => { stlUnits = e.target.value; });
   $('#tplSpacing').addEventListener('change', e => { templateSpacing = Math.max(3, Math.min(48, +e.target.value || 12)); renderBuild(); });
   $('#build').querySelectorAll('button[data-x]').forEach(b => b.addEventListener('click', () => doExport(b.dataset.x)));
+  wirePrintPanel();
 }
+
+// ─── 3D-print a scale model (Stratasys F900: 36 × 24 × 36 in) ─────────────────────────────
+const printOpts = { scale: 4, shape: 'open', wallMm: 3, maxLenIn: 35, jointMm: 12, boltMm: 6.5, envelopeIn: [36, 24, 36] };
+let printResult = null, printBusy = false, printKey = '', printWorker = null, printReq = 0;
+const ASA_G_CC = 1.07;
+function printPanelHTML() {
+  const o = printOpts, stale = printResult && printKey !== paramsKey() + JSON.stringify(o);
+  let h = `<h3>3D print a scale model</h3>
+  <p class="hint" style="margin-top:0">For tow tests and display models. The Stratasys F900 build volume is 36 × 24 × 36 in, so long models split into parts joined by bolt-through bulkheads. Parts come out flat side down, in millimetres. Models can be printed; the competition mold can't.</p>
+  <div class="print-grid">
+    <label>Scale 1 :<input id="pr_scale" type="number" min="1" max="40" step="0.5" value="${o.scale}"></label>
+    <label>Model<select id="pr_shape">
+      <option value="open"${o.shape === 'open' ? ' selected' : ''}>Open canoe, hollow (tow test)</option>
+      <option value="closed"${o.shape === 'closed' ? ' selected' : ''}>Closed hull, hollow, flat deck</option>
+      <option value="solid"${o.shape === 'solid' ? ' selected' : ''}>Solid hull (small display)</option></select></label>
+    <label>Wall thickness (mm)<input id="pr_wall" type="number" min="1" max="20" step="0.5" value="${o.wallMm}"></label>
+    <label>Max part length (in)<input id="pr_len" type="number" min="6" max="36" step="0.5" value="${o.maxLenIn}"></label>
+    <label>Joint bulkhead (mm)<input id="pr_joint" type="number" min="4" max="40" step="1" value="${o.jointMm}"></label>
+    <label>Bolt / pin hole (mm)<input id="pr_bolt" type="number" min="2" max="16" step="0.5" value="${o.boltMm}"></label>
+  </div>
+  <div class="print-presets"><span>Quick:</span>
+    <button class="small" data-preset="tow">1:4 tow model</button>
+    <button class="small" data-preset="one">Largest one-piece</button>
+    <button class="small" data-preset="display">1:12 display</button>
+  </div>
+  <p><button class="primary" id="pr_go"${printBusy ? ' disabled' : ''}>${printBusy ? 'Building print files…' : 'Build print files'}</button></p>`;
+  if (printResult) {
+    const r = printResult, lam = r.lam;
+    const gramsSolid = r.modelVolIn3 * 16.387 * ASA_G_CC;
+    const target = built?.analysis ? built.analysis.totalWeight / lam ** 3 : null;
+    h += `${stale ? '<div class="note">The design or print options changed since these files were built. Build again.</div>' : ''}
+    <table class="kv">
+      <tr><th>Part (${r.n})</th><th>L × W × H</th><th>F900</th></tr>
+      ${r.segments.map((g, i) => `<tr><td><button class="small" data-part="${i}">STL</button> ${g.name}</td><td>${g.dimsIn.map(v => fmt(v, 2)).join(' × ')} in</td><td>${g.fits ? 'fits' : '<span style="color:var(--bad)">too big</span>'}</td></tr>`).join('')}
+    </table>
+    <table class="kv" style="margin-top:6px">
+      <tr><td>Model length · scale</td><td>${fmt(r.lengthIn, 1)} in · 1:${lam}</td><td></td></tr>
+      <tr><td>Printed volume (solid-equivalent)</td><td>${fmt(r.modelVolIn3, 1)} in³</td><td>${fmt(gramsSolid / 1000, 2)} kg ASA</td></tr>
+      ${target !== null && r.shape === 'open' ? `<tr><td>Ballast to scaled race load (${fmt(target, 2)} lb); weigh the real print</td><td>≈ ${fmt(Math.max(0, target - gramsSolid / 453.6), 2)} lb</td><td></td></tr>` : ''}
+      ${r.joints.length ? `<tr><td>Joints (from stern)</td><td>${r.joints.map(j => fmt(j.xModelIn, 1) + ' in').join(', ')}</td><td>${r.joints[0].holes} hole${r.joints[0].holes > 1 ? 's' : ''} each</td></tr>` : ''}
+    </table>
+    <p style="margin-top:8px"><button id="pr_zip">Download all parts (ZIP)</button></p>
+    <p class="hint">Print flat (gunwale or deck) side down. Joints are solid bulkheads: bolt through the holes and seal with silicone for a tow model, then seal and sand the outside. The top is cut flat at the design depth, so the sheer drop isn't modeled.</p>`;
+  }
+  return h;
+}
+function wirePrintPanel() {
+  const num = (id, key) => { const e = $(id); if (e) e.addEventListener('change', () => { printOpts[key] = +e.value; }); };
+  num('#pr_scale', 'scale'); num('#pr_wall', 'wallMm'); num('#pr_len', 'maxLenIn'); num('#pr_joint', 'jointMm'); num('#pr_bolt', 'boltMm');
+  $('#pr_shape')?.addEventListener('change', e => { printOpts.shape = e.target.value; });
+  document.querySelectorAll('[data-preset]').forEach(b => b.addEventListener('click', () => {
+    const k = b.dataset.preset;
+    if (k === 'tow') Object.assign(printOpts, { scale: 4, shape: 'open', wallMm: 3, maxLenIn: 35 });
+    if (k === 'one') Object.assign(printOpts, { scale: Math.ceil((design.p.length / 35) * 2) / 2, shape: 'closed', wallMm: 3, maxLenIn: 35 });
+    if (k === 'display') Object.assign(printOpts, { scale: 12, shape: 'solid', maxLenIn: 35 });
+    renderBuild();
+  }));
+  $('#pr_go')?.addEventListener('click', runPrint);
+  $('#pr_zip')?.addEventListener('click', () => {
+    const r = printResult; if (!r) return;
+    download(makeZip(r.segments.map(g => ({ name: `${slug()}-1to${r.lam}-${g.name}.stl`, data: toBinarySTL(g.soup, g.name, 1) }))), `${slug()}-print-1to${r.lam}.zip`);
+    toast('Downloaded');
+  });
+  document.querySelectorAll('[data-part]').forEach(b => b.addEventListener('click', () => {
+    const g = printResult.segments[+b.dataset.part];
+    download(new Blob([toBinarySTL(g.soup, g.name, 1)], { type: 'model/stl' }), `${slug()}-1to${printResult.lam}-${g.name}.stl`);
+  }));
+}
+function runPrint() {
+  if (printBusy) return;
+  if (!(printOpts.scale >= 1 && printOpts.maxLenIn >= 6 && printOpts.wallMm > 0)) return toast('Check the print options');
+  if (!printWorker) {
+    printWorker = new Worker(new URL('./worker.js', import.meta.url), { type: 'module' });
+    printWorker.onmessage = e => {
+      const m = e.data;
+      if (m.type === 'boot') return;
+      printBusy = false;
+      if (m.type === 'printed') { printResult = m.res; printKey = printWorker._key; toast(`Print files ready: ${m.res.n} part${m.res.n > 1 ? 's' : ''}`); }
+      else if (m.type === 'error') toast('Print build failed: ' + m.message);
+      renderBuild();
+    };
+  }
+  printBusy = true;
+  printWorker._key = paramsKey() + JSON.stringify(printOpts);
+  printWorker.postMessage({ type: 'print', id: ++printReq, params: { ...params }, opts: { ...printOpts } });
+  renderBuild();
+}
+
 function extents(soup) {
   const lo = [Infinity, Infinity, Infinity], hi = [-Infinity, -Infinity, -Infinity];
   for (let i = 0; i < soup.length; i += 3) for (let k = 0; k < 3; k++) { lo[k] = Math.min(lo[k], soup[i + k]); hi[k] = Math.max(hi[k], soup[i + k]); }

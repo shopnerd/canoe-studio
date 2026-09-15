@@ -14,6 +14,12 @@ onmessage = async e => {
   const m = e.data;
   try {
     await ready;
+    if (m.type === 'print') {
+      const design = buildDesign(m.params);
+      const res = K.buildPrint(design, m.opts);
+      postMessage({ id: m.id, type: 'printed', res }, res.segments.map(g => g.soup.buffer));
+      return;
+    }
     if (m.type === 'build') {
       const t0 = performance.now();
       const design = buildDesign(m.params);

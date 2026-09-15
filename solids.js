@@ -1,6 +1,6 @@
 // solids.js — Manifold (WASM) booleans: watertight hull, concrete shell, mold blocks, STL/ZIP writers.
 // Isomorphic: used by worker.js in the browser and by test/core-test.mjs in Node.
-import { rowsToSoup, innerRows, analyze, massProps } from './hull.js';
+import { rowsToSoup, innerRows, analyze, massProps, clipRows, sliceLoops } from './hull.js';
 
 export function createSolidKit(wasm) {
   const { Manifold, Mesh } = wasm;
@@ -94,7 +94,82 @@ export function createSolidKit(wasm) {
     return out;
   }
 
-  return { fromSoup, toSoup, build };
+  // ── Scale model for 3D printing: scale, hollow, split to fit the printer, bolt-hole joints, pose flat side down ──
+  // o = { scale (λ), shape: 'open'|'closed'|'solid', wallMm, maxLenIn, jointMm, boltMm, envelopeIn: [x,y,z] }
+  function buildPrint(design, o) {
+    const { p, rows } = design;
+    const H = p.height, lam = o.scale, s = 1 / lam, MM = 25.4;
+    const garbage = [];
+    const keep = m => (garbage.push(m), m);
+    const topRows = clipRows(rows, () => H);          // flat top at the depth: prints gunwale/deck down
+    const hullSoup = rowsToSoup(topRows);
+    const hull = keep(fromSoup(hullSoup));
+    const bb = hull.boundingBox();
+    const x0 = bb.min[0], x1 = bb.max[0], lenFull = x1 - x0;
+    const n = Math.max(1, Math.ceil(lenFull * s / o.maxLenIn - 1e-9));
+    const cuts = Array.from({ length: n - 1 }, (_, k) => x0 + lenFull * (k + 1) / n);
+    const toFull = mm => mm / MM * lam;
+    const jHalf = toFull(o.jointMm) / 2, rBolt = toFull(o.boltMm) / 2;
+
+    let body = hull;
+    if (o.shape !== 'solid') {
+      const tFull = toFull(o.wallMm);
+      let cutter = keep(fromSoup(rowsToSoup(innerRows(topRows, tFull, H + 4))));
+      if (o.shape === 'closed') {
+        const slab = keep(Manifold.cube([lenFull + 20, p.width * 3, H - tFull + 10]).translate([x0 - 10, -p.width * 1.5, -10]));
+        cutter = keep(cutter.intersect(slab));
+      }
+      for (const xc of cuts) {                        // solid bulkheads either side of each joint
+        const bulk = keep(Manifold.cube([2 * jHalf, p.width * 3, H * 3]).translate([xc - jHalf, -p.width * 1.5, -H]));
+        cutter = keep(cutter.subtract(bulk));
+      }
+      body = keep(hull.subtract(cutter));
+    }
+
+    const joints = [];
+    for (const xc of cuts) {                          // alignment / bolt holes through the joint
+      const pts = sliceLoops(hullSoup, xc).flat();
+      if (!pts.length) continue;
+      const zmin = Math.min(...pts.map(q => q[1])), zmax = Math.max(...pts.map(q => q[1]));
+      const zc = zmin + 0.5 * (zmax - zmin);
+      let w = 0;
+      for (const lp of sliceLoops(hullSoup, xc)) for (let i = 0; i < lp.length; i++) {
+        const a2 = lp[i], b2 = lp[(i + 1) % lp.length];
+        if ((a2[1] - zc) * (b2[1] - zc) <= 0 && a2[1] !== b2[1]) w = Math.max(w, Math.abs(a2[0] + (b2[0] - a2[0]) * (zc - a2[1]) / (b2[1] - a2[1])));
+      }
+      const ys = w - 0.45 * w >= 4 * rBolt && 0.45 * w >= 3 * rBolt ? [-0.45 * w, 0.45 * w] : [0];
+      const holeLen = o.shape === 'solid' ? 2 * toFull(15) : 2 * jHalf + 2;
+      for (const y of ys) {
+        const cyl = keep(Manifold.cylinder(holeLen, rBolt, rBolt, 32, true).rotate([0, 90, 0]).translate([xc, y, zc]));
+        body = keep(body.subtract(cyl));
+      }
+      joints.push({ xModelIn: (xc - x0) * s, holes: ys.length, zModelIn: (zc - bb.min[2]) * s });
+    }
+
+    const edges = [x0 - 1, ...cuts, x1 + 1];
+    const env = [...o.envelopeIn].sort((a3, b3) => b3 - a3);
+    const segments = [];
+    for (let k = 0; k < n; k++) {
+      let seg = body;
+      if (k > 0) seg = keep(seg.trimByPlane([1, 0, 0], edges[k]));
+      if (k < n - 1) seg = keep(seg.trimByPlane([-1, 0, 0], -edges[k + 1]));
+      seg = keep(seg.scale([s * MM, s * MM, s * MM]).rotate([180, 0, 0]));   // model mm, flat top down
+      const sb = seg.boundingBox();
+      seg = keep(seg.translate([-sb.min[0], -sb.min[1], -sb.min[2]]));
+      const dims = [0, 1, 2].map(i => (sb.max[i] - sb.min[i]) / MM);
+      const sorted = [...dims].sort((a3, b3) => b3 - a3);
+      segments.push({
+        name: n === 1 ? 'hull-model' : `hull-model-part${k + 1}-of-${n}`,
+        soup: toSoup(seg), dimsIn: dims, volIn3: seg.volume() / MM ** 3,
+        fits: sorted.every((d3, i) => d3 <= env[i] + 1e-6),
+      });
+    }
+    const modelVolIn3 = segments.reduce((a3, g) => a3 + g.volIn3, 0);
+    for (const m of garbage) try { m.delete(); } catch { /* freed */ }
+    return { lam, n, shape: o.shape, lengthIn: lenFull * s, joints, segments, modelVolIn3 };
+  }
+
+  return { fromSoup, toSoup, build, buildPrint };
 }
 
 export function sheerRing(hullRows) {
