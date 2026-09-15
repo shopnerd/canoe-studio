@@ -166,12 +166,13 @@ const sun = new THREE.DirectionalLight(0xffffff, 1.8); sun.position.set(200, -30
 const fill = new THREE.DirectionalLight(0xffffff, 0.5); fill.position.set(-300, 200, 100); scene.add(fill);
 
 const groups = {};
-for (const k of ['hull', 'stations', 'curves', 'shell', 'water', 'mold', 'ground']) { groups[k] = new THREE.Group(); scene.add(groups[k]); }
+for (const k of ['hull', 'stations', 'curves', 'shell', 'water', 'mold', 'foam', 'ground']) { groups[k] = new THREE.Group(); scene.add(groups[k]); }
 const mats = {
   hull: new THREE.MeshStandardMaterial({ color: 0xcfccc3, roughness: 0.85, metalness: 0, side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1 }),
   shell: new THREE.MeshStandardMaterial({ color: 0xa9a79f, roughness: 0.95, metalness: 0, side: THREE.DoubleSide }),
   water: new THREE.MeshBasicMaterial({ color: 0x1f6fb2, transparent: true, opacity: 0.16, side: THREE.DoubleSide, depthWrite: false }),
   mold: new THREE.MeshStandardMaterial({ color: 0xe6d3a3, roughness: 0.9, transparent: true, opacity: 0.55, depthWrite: false, side: THREE.DoubleSide }),
+  foam: new THREE.MeshStandardMaterial({ color: 0x6fb1e0, roughness: 0.7, metalness: 0, side: THREE.DoubleSide }),
   station: new THREE.LineBasicMaterial({ color: 0x3b4048, transparent: true, opacity: 0.45 }),
   sheerLine: new THREE.LineBasicMaterial({ color: 0x1f2328 }),
   waterEdge: new THREE.LineBasicMaterial({ color: 0x1f6fb2 }),
@@ -269,6 +270,7 @@ function updateSolids() {
     }
     groups.mold.add(new THREE.LineSegments(lineGeo(segs), edges));
   }
+  updateFoam();
   disposeGroup(groups.water);
   const L = built.analysis.loaded;
   if (L && !L.sunk) {
@@ -278,6 +280,15 @@ function updateSolids() {
   applyLayers();
 }
 
+// Foam blocks from the §6.6 plan: the bow block as computed, the stern block as its mirror image.
+function updateFoam() {
+  disposeGroup(groups.foam);
+  if (!foamPlan?.needed || foamKey !== foamKeyNow()) return;
+  const g = soupGeometry(foamPlan.foamSoup);
+  groups.foam.add(new THREE.Mesh(g, mats.foam));
+  const stern = new THREE.Mesh(g, mats.foam); stern.scale.x = -1;
+  groups.foam.add(stern);
+}
 function applyLayers() {
   const shellOn = layerOn('shell') && groups.shell.children.length;
   groups.hull.visible = layerOn('hull') && !shellOn;
@@ -286,12 +297,14 @@ function applyLayers() {
   groups.shell.visible = !!shellOn;
   groups.water.visible = layerOn('water');
   groups.mold.visible = layerOn('mold');
+  groups.foam.visible = layerOn('foam');
   drawLegend();
 }
 function drawLegend() {
   const items = [];
   if (layerOn('curves')) items.push(['Cross section', COLORS.crossSection], ['Profile', COLORS.profile], ['Plan', COLORS.plan], ['Sheer', COLORS.sheer]);
   if (layerOn('water') && built?.analysis?.loaded) items.push([`Waterline at race load (${fmt(built.analysis.totalWeight, 0)} lb)`, '#1f6fb2']);
+  if (layerOn('foam') && groups.foam.children.length) items.push([`Flotation foam, bulkheads ${fmt(foamPlan.d, 1)} in from the tips`, '#6fb1e0']);
   $('#legend').innerHTML = items.map(([t, c]) => `<span><i style="background:${c}"></i>${t}</span>`).join('');
 }
 
@@ -771,6 +784,7 @@ function runFoam() {
       foamBusy = false;
       if (m.type === 'foamed') { foamPlan = m.res; foamKey = foamWorker._key; toast(m.res.needed ? `Foam plan: bulkheads ${fmt(m.res.d, 1)} in from each tip` : 'No foam needed'); }
       else if (m.type === 'error') toast('Foam plan failed: ' + m.message);
+      updateFoam(); applyLayers();
       if (built) { renderRules(); renderBuild(); }
     };
   }
