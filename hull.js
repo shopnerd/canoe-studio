@@ -47,6 +47,9 @@ export const PARAMS = [
   { group: 'Analysis inputs', key: 'crewCG', label: 'Paddler CG above keel', def: 14, min: 0, max: 36, step: 0.5, unit: 'in', help: 'Kneeling ≈ 12–16 in, sitting on a seat ≈ 18–22 in.' },
   { group: 'Analysis inputs', key: 'extraWeight', label: 'Other weight (reinf., paint)', def: 10, min: 0, max: 200, step: 1, unit: 'lb' },
   { group: 'Analysis inputs', key: 'foam', label: 'Flotation foam', def: 0, min: 0, max: 20, step: 0.1, unit: 'ft³', help: 'Encased in the end bulkheads. 2027 rules: only within 3 ft of the bow and stern tips.' },
+  { group: 'Analysis inputs', key: 'foamPcf', label: 'Foam density', def: 2, min: 0.5, max: 10, step: 0.1, unit: 'pcf', help: 'EPS is about 1–2 pcf, XPS about 2 pcf.' },
+  { group: 'Analysis inputs', key: 'foamMargin', label: 'Flotation margin', def: 25, min: 0, max: 100, step: 5, unit: '%', help: 'Extra foam lift beyond what just keeps the swamped hull afloat. The foam planner (Rules tab) sizes the end bulkheads to this.' },
+  { group: 'Analysis inputs', key: 'foamCap', label: 'Concrete over the foam', def: 0.5, min: 0.125, max: 2, step: 0.0625, unit: 'in', help: 'Thickness of the concrete that encases the foam: the top under the gunwale and the bulkhead face. Usually the wall thickness.' },
   { group: 'Analysis inputs', key: 'speed', label: 'Speed for drag readout', def: 5, min: 1, max: 9, step: 0.1, unit: 'mph' },
   { group: 'Analysis inputs', key: 'paddlerPower', label: 'Effective power per paddler', def: 70, min: 20, max: 250, step: 5, unit: 'W', help: 'Power that actually pushes the boat (after paddle losses). Placeholder: calibrate it from a timed 200 m run on the Tow test guide.' },
   { group: 'Analysis inputs', key: 'formFactor', label: 'Form factor k', def: 0.08, min: 0, max: 0.4, step: 0.01, unit: '', help: 'Extra viscous drag from the hull shape, as a fraction of flat-plate friction. ~0.05–0.12 for slender hulls; a model tow test measures it.' },
@@ -639,7 +642,7 @@ export function analyze(p, hullSoup, shellSoup, sheerRing, extra = {}) {
 
   // Swamped: concrete + foam displace water, paddlers out. Floats if buoyancy ≥ weight.
   const swampBuoy = (shell.volume * waterPerIn3) + p.foam * WATER_PCF;
-  const swampWeight = hullWeight + p.extraWeight + p.foam * FOAM_PCF;
+  const swampWeight = hullWeight + p.extraWeight + p.foam * (p.foamPcf ?? FOAM_PCF);
 
   // Speed & friction drag (ITTC-57 friction line; residuary/wave drag not included)
   const LWLft = loaded.LWL / 12;
@@ -678,7 +681,7 @@ export function analyze(p, hullSoup, shellSoup, sheerRing, extra = {}) {
     coed, slalom, shellVolumeIn3: shell.volume, shellAreaIn2: shell.area / 2,
     hullWeight, crewWeight, totalWeight: W, G, keelZ,
     loaded, empty, gz, downflood, vanishing, maxGZ,
-    swamp: { buoyancy: swampBuoy, weight: swampWeight, margin: swampBuoy - swampWeight, floats: swampBuoy >= swampWeight, foamNeededFt3: Math.max(0, (hullWeight + p.extraWeight - shell.volume * waterPerIn3) / (WATER_PCF - FOAM_PCF)) },
+    swamp: { buoyancy: swampBuoy, weight: swampWeight, margin: swampBuoy - swampWeight, floats: swampBuoy >= swampWeight, foamNeededFt3: Math.max(0, (hullWeight + p.extraWeight - shell.volume * waterPerIn3) / (WATER_PCF - (p.foamPcf ?? FOAM_PCF))) },
     speed: { hullSpeedMph, Fn, Re, Cf, dragLb: Rf * 0.224809, dragN: Rf },
   };
 }

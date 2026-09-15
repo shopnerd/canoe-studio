@@ -20,6 +20,12 @@ onmessage = async e => {
       postMessage({ id: m.id, type: 'printed', res }, res.segments.map(g => g.soup.buffer));
       return;
     }
+    if (m.type === 'foam') {
+      const design = buildDesign(m.params);
+      const res = K.buildFoam(design);
+      postMessage({ id: m.id, type: 'foamed', res }, res.foamSoup ? [res.foamSoup.buffer, res.capSoup.buffer] : []);
+      return;
+    }
     if (m.type === 'build') {
       const t0 = performance.now();
       const design = buildDesign(m.params);

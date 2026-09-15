@@ -31,7 +31,7 @@ export const RULESETS = {
 };
 
 // status: 'pass' | 'warn' | 'fail' | 'info'
-export function checkRules(year, p, a) {
+export function checkRules(year, p, a, { foamPlan = null } = {}) {
   const R = RULESETS[year], L = R.limits, out = [];
   const add = (ref, title, status, detail) => out.push({ ref, title, status, detail });
   const f = (v, d = 2) => Number(v).toFixed(d);
@@ -62,7 +62,15 @@ export function checkRules(year, p, a) {
     s.floats ? 'pass' : 'fail',
     s.floats ? `Swamped, it floats with ${f(s.margin, 1)} lb to spare (concrete + ${f(p.foam, 2)} ft³ foam).`
       : `Swamped, it is ${f(-s.margin, 1)} lb short. Add about ${f(s.foamNeededFt3, 2)} ft³ of foam in the end bulkheads, or lighten the concrete below 62.4 pcf.`);
-  if (voidIn3 !== null) {
+  if (foamPlan && foamPlan.needed) {
+    const fp = foamPlan;
+    add('6.6', `Foam fits within ${L.foamZone / 12} ft of bow and stern`,
+      fp.fits ? 'pass' : 'fail',
+      fp.fits ? `Foam plan: bulkheads ${f(fp.d, 1)} in from each tip (limit ${L.foamZone} in), ${f(2 * fp.foamIn3 / 1728, 2)} ft³ of foam in total, lift ${f(fp.liftLb, 1)} lb against ${f(fp.sinkTotalLb, 1)} lb (${f(fp.marginPct, 0)}% margin). Foam must be encased in concrete.`
+        : `Even the full ${L.foamZone} in zone at both ends gives only ${f(fp.liftLb, 1)} lb of lift against ${f(fp.sinkTotalLb, 1)} lb (with the ${f(p.foamMargin, 0)}% margin). Lighten the mix or the extras.`);
+  } else if (foamPlan && !foamPlan.needed) {
+    add('6.6', `Foam fits within ${L.foamZone / 12} ft of bow and stern`, 'info', 'Foam plan: none needed, the swamped hull floats on its own concrete.');
+  } else if (voidIn3 !== null) {
     const needIn3 = Math.max(foamIn3, s.floats ? 0 : s.foamNeededFt3 * 1728);
     add('6.6', `Foam fits within ${L.foamZone / 12} ft of bow and stern`,
       needIn3 === 0 ? 'info' : needIn3 <= voidIn3 ? 'pass' : 'fail',

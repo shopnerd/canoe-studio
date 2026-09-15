@@ -21,6 +21,8 @@ let design = null;       // latest buildDesign() on the main thread
 let built = null;        // latest worker result {solids, analysis}
 let builtKey = '';       // params key of `built`
 let baseline = null;     // pinned analysis for comparison
+let foamPlan = null, foamBusy = false, foamKey = '', foamWorker = null, foamReq = 0;   // §6.6 foam plan (on demand)
+const foamKeyNow = () => JSON.stringify(PARAMS.filter(s => s.key !== 'foam').map(s => params[s.key]));
 const undo = [];
 
 function loadInitial() {
@@ -547,7 +549,7 @@ function renderAnalysis() {
     <tr><td>Hull surface area (outside)</td><td>${fmt(ft2(a.shellAreaIn2), 1)} ft²</td><td></td></tr>
   </table>
   <div class="note ${a.swamp.floats ? 'good' : 'bad'}"><b>Swamp flotation:</b> filled with water, the concrete + foam gives ${fmt(a.swamp.buoyancy, 1)} lb of buoyancy against ${fmt(a.swamp.weight, 1)} lb of hull.
-  ${a.swamp.floats ? `Margin ${fmt(a.swamp.margin, 1)} lb — it floats.` : `Short by ${fmt(-a.swamp.margin, 1)} lb — add about <b>${fmt(a.swamp.foamNeededFt3, 2)} ft³</b> of flotation foam, or lighten the mix below ${WATER_PCF} pcf.`}
+  ${a.swamp.floats ? `Margin ${fmt(a.swamp.margin, 1)} lb — it floats.` : `Short by ${fmt(-a.swamp.margin, 1)} lb — add about <b>${fmt(a.swamp.foamNeededFt3, 2)} ft³</b> of flotation foam (plan the end bulkheads on the Rules tab), or lighten the mix below ${WATER_PCF} pcf.`}
   Check your competition year's exact swamp-test rule.</div>`;
 
   h += `<h3>Hydrostatics</h3><table class="kv">
@@ -677,13 +679,16 @@ $('#btnBaseline').addEventListener('click', () => {
 function renderRules() {
   const a = built.analysis, p = design.p, R = RULESETS[RULE_YEAR];
   const stale = !builtKey.startsWith(paramsKey());
-  const checks = checkRules(RULE_YEAR, p, a);
+  const plan = foamPlan && foamKey === foamKeyNow() ? foamPlan : null;
+  const checks = checkRules(RULE_YEAR, p, a, { foamPlan: plan });
   const count = st => checks.filter(c => c.status === st).length;
   const S = a.slalom, c = a.coed;
   let h = stale ? `<div class="note">Showing the previous build — updating…</div>` : '';
   h += `<div class="rules-head"><b>${R.title}</b><span>${R.finals}</span><span>${R.issued} · <a href="${R.url}" target="_blank" rel="noopener">read the RFP (PDF)</a> · <a href="learn/rules-2027.html" target="_blank" rel="noopener">plain-English guide</a></span>
     <div class="tally">${['fail', 'warn', 'pass', 'info'].filter(count).map(st => `<i class="s-${st}">${count(st)} ${st === 'info' ? 'notes' : st === 'warn' ? 'close' : st}</i>`).join('')}</div></div>`;
   h += `<ul class="checks">${checks.map(k => `<li class="s-${k.status}"><span class="st">${k.status === 'warn' ? 'close' : k.status}</span><b>${k.title}<small>§${k.ref}</small></b><p>${k.detail}</p></li>`).join('')}</ul>`;
+
+  h += foamPanelHTML(a, p);
 
   h += `<h3>Freeboard — 4 co-ed paddlers (§6.2.2)</h3><div class="chart">${freeboardChart(c)}</div>
   <p class="hint">Gunwale height above the waterline along the hull at ${fmt(c.weight, 0)} lb. Names (5 in letters, top 1 in below the gunwale) need the gunwale above the red line where they're painted.</p>`;
@@ -717,6 +722,81 @@ function renderRules() {
   h += `<h3>Key dates</h3><table class="kv">${R.dates.map(([k, v]) => `<tr><td>${k}</td><td>${v}</td><td></td></tr>`).join('')}</table>
   <p class="hint">Mix design rules (c/cm &lt; 0.50, 30–50% ASTM C595 cement, ≥ 35% aggregate volume, two mixes max) live in the RFP's Excel templates and aren't checked here.</p>`;
   $('#rules').innerHTML = h;
+  wireFoamPanel();
+}
+
+// ─── Flotation foam plan (§6.6): bulkhead distance, foam and cap volumes, templates ──────────
+function foamPanelHTML(a, p) {
+  const fresh = foamPlan && foamKey === foamKeyNow(), r = foamPlan;
+  let h = `<h3>Flotation foam plan (§6.6)</h3>
+  <p class="hint" style="margin-top:0">Sizes the bow and stern foam so the swamped canoe floats with a ${fmt(p.foamMargin, 0)}% margin: foam fills the ends up to ${fmt(p.foamCap, 3)} in below the gunwale and is closed by a concrete cap and bulkhead ${fmt(p.foamCap, 3)} in thick, whose weight is counted. Sinking force = ${fmt(p.concreteDensity, 1)} pcf concrete + ${fmt(p.extraWeight, 0)} lb extras, less their buoyancy. Foam ${fmt(p.foamPcf, 1)} pcf. Both ends are the same. Takes a second or two.</p>
+  <p><button class="primary" id="fp_go"${foamBusy ? ' disabled' : ''}>${foamBusy ? 'Planning the foam…' : r ? 'Plan the foam again' : 'Plan the foam'}</button></p>`;
+  if (!r) return h;
+  h += fresh ? '' : `<div class="note">The design changed since this plan. Plan again.</div>`;
+  if (!r.needed) return h + `<div class="note good"><b>No foam needed.</b> At ${fmt(p.concreteDensity, 1)} pcf the swamped hull floats on its own concrete with ${fmt(-r.sinkingLb, 1)} lb to spare (extras included).</div>`;
+  const totalFt3 = 2 * r.foamIn3 / 1728;
+  h += `<div class="cards">
+    <div class="card"><div class="k">Bulkhead from each tip</div><div class="v">${fmt(r.d, 1)}<small>in</small></div></div>
+    <div class="card"><div class="k">Foam per end</div><div class="v">${fmt(r.foamIn3 / 1728, 3)}<small>ft³</small></div></div>
+    <div class="card ${r.fits ? 'pass' : 'fail'}"><div class="k">Within ${r.zone} in of the tip</div><div class="v">${r.fits ? 'yes' : 'no'}</div></div>
+  </div>
+  <table class="kv">
+    <tr><td>Sinking force, swamped</td><td>${fmt(r.sinkingLb, 1)} lb</td><td></td></tr>
+    <tr><td>With the cap concrete</td><td>${fmt(r.sinkTotalLb, 1)} lb</td><td></td></tr>
+    <tr><td>Foam lift, both ends</td><td>${fmt(r.liftLb, 1)} lb</td><td>${isFinite(r.marginPct) ? fmt(r.marginPct, 0) + '% margin' : ''}</td></tr>
+    <tr><td>Foam, each end</td><td>${fmt(r.foamIn3, 0)} in³ · ${fmt(r.foamLb, 2)} lb</td><td></td></tr>
+    <tr><td>Cap + bulkhead, each end</td><td>${fmt(r.capIn3, 0)} in³ · ${fmt(r.capLb, 1)} lb</td><td></td></tr>
+    <tr><td><b>Foam in total</b></td><td><b>${fmt(totalFt3, 2)} ft³</b></td><td>${Math.abs(p.foam - totalFt3) < 0.005 ? 'in the analysis' : `<button class="small" id="fp_use">Use in the analysis</button>`}</td></tr>
+  </table>`;
+  if (!r.fits) h += `<div class="note bad"><b>It doesn't fit.</b> Even the full ${r.zone} in zone at both ends gives ${fmt(r.liftLb, 1)} lb of lift against ${fmt(r.sinkTotalLb, 1)} lb. Lighten the mix or the extras until it does; foam anywhere else breaks §6.6.</div>`;
+  h += `<div class="exports" style="margin-top:8px">
+    <div class="what"><b>Foam block</b><span>STL of one end; the other end is the mirror image</span></div><button data-fx="foamstl">STL</button>
+    <div class="what"><b>Foam templates</b><span>Full-size SVG: the block's section at the bulkhead and every 6 in toward the tip, for a hand-guided hot wire</span></div><button data-fx="foamtpl">SVG</button>
+  </div>
+  <p class="hint">Cut the foam a touch small, glue it in after the hull cures to the first layer, then cap it with concrete and the bulkhead so no foam shows. The Analysis tab's swamp check uses the foam volume only; this plan also carries the cap concrete.</p>`;
+  return h;
+}
+function wireFoamPanel() {
+  $('#fp_go')?.addEventListener('click', runFoam);
+  $('#fp_use')?.addEventListener('click', () => { pushUndo(); setParams({ foam: Math.round(2 * foamPlan.foamIn3 / 1728 * 100) / 100 }); toast('Foam volume set'); });
+  document.querySelectorAll('[data-fx]').forEach(b => b.addEventListener('click', () => doExport(b.dataset.fx)));
+}
+function runFoam() {
+  if (foamBusy) return;
+  if (!foamWorker) {
+    foamWorker = new Worker(new URL('./worker.js', import.meta.url), { type: 'module' });
+    foamWorker.onmessage = e => {
+      const m = e.data;
+      if (m.type === 'boot') return;
+      foamBusy = false;
+      if (m.type === 'foamed') { foamPlan = m.res; foamKey = foamWorker._key; toast(m.res.needed ? `Foam plan: bulkheads ${fmt(m.res.d, 1)} in from each tip` : 'No foam needed'); }
+      else if (m.type === 'error') toast('Foam plan failed: ' + m.message);
+      if (built) { renderRules(); renderBuild(); }
+    };
+  }
+  foamBusy = true;
+  foamWorker._key = foamKeyNow();
+  foamWorker.postMessage({ type: 'foam', id: ++foamReq, params: { ...params } });
+  renderRules();
+}
+function foamTemplatesSVG() {
+  const r = foamPlan, p = design.p;
+  const cells = [];
+  for (let x = r.tip - r.d + 0.05, i = 0; x < r.tip; x = r.tip - r.d + 6 * ++i) {
+    const loops = sliceLoops(r.foamSoup, x);
+    if (loops.length) cells.push({ x, loops, fromTip: r.tip - x });
+  }
+  const wMax = Math.max(1, ...cells.flatMap(c => c.loops.flat().map(q => Math.abs(q[0])))) * 2;
+  const cw = wMax + 3, ch = p.height + 4, cols = Math.max(1, Math.min(cells.length, Math.floor(40 / cw)));
+  const rowsN = Math.ceil(cells.length / cols), W = cols * cw, H = rowsN * ch + 2;
+  let body = '';
+  cells.forEach((c, i) => {
+    const ox = (i % cols) * cw + cw / 2, oy = Math.floor(i / cols) * ch + ch - 2;
+    for (const lp of c.loops) body += `<path d="M${lp.map(q => (ox + q[0]).toFixed(3) + ',' + (oy - q[1]).toFixed(3)).join('L')}Z" fill="none" stroke="#000" stroke-width="0.02"/>`;
+    body += `<line x1="${ox}" x2="${ox}" y1="${oy + 0.6}" y2="${oy - p.height - 0.6}" stroke="#d9480f" stroke-width="0.015" stroke-dasharray="0.3 0.2"/>`;
+    body += `<text x="${ox - wMax / 2}" y="${oy + 1.3}" font-size="0.7" font-family="monospace">Foam ${i === 0 ? 'at the bulkhead, ' : ''}${c.fromTip.toFixed(1)} in from the tip — ${designName}</text>`;
+  });
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" width="${W}in" height="${H}in" viewBox="0 0 ${W} ${H}">\n<!-- Canoe Studio flotation foam templates, 1 unit = 1 inch, true scale. Sections of the foam block (inside the concrete, ${p.foamCap} in below the gunwale) at the bulkhead and every 6 in toward the tip. Orange line = centerline. Same block at bow and stern. -->\n${body}\n</svg>`;
 }
 function freeboardChart(c) {
   const W = 408, Hc = 150, pad = { l: 36, r: 10, t: 10, b: 22 };
@@ -794,6 +874,8 @@ function renderBuild() {
     <div class="what"><b>Mold blocks (print)</b><span>ZIP, one STL per block — practice pieces, not a competition mold</span></div><button data-x="blocks" ${m ? '' : 'disabled'}>ZIP</button>
     <div class="what"><b>Section templates</b><span>Full-size SVG, a station every ${templateSpacing} in — print or laser-cut</span></div><button data-x="templates">SVG</button>
     <div class="what"><b>Table of offsets</b><span>CSV of half-breadths at 1 in waterlines</span></div><button data-x="offsets">CSV</button>
+    <div class="what"><b>Flotation foam block</b><span>STL of one end, from the foam plan on the Rules tab${foamPlan?.needed ? '' : ' — plan it first'}</span></div><button data-x="foamstl" ${foamPlan?.needed ? '' : 'disabled'}>STL</button>
+    <div class="what"><b>Foam templates</b><span>Full-size SVG sections of the foam block for a hand-guided hot wire</span></div><button data-x="foamtpl" ${foamPlan?.needed ? '' : 'disabled'}>SVG</button>
     <div class="what"><b>Design file</b><span>JSON with every parameter, reopen with Open</span></div><button data-x="json">JSON</button>
   </div>`;
   $('#build').innerHTML = h;
@@ -911,6 +993,9 @@ function doExport(kind) {
   if (kind === 'templates') download(new Blob([templatesSVG()], { type: 'image/svg+xml' }), `${slug()}-section-templates.svg`);
   if (kind === 'hotwire' && s.mold) download(new Blob([hotwireSVG()], { type: 'image/svg+xml' }), `${slug()}-hot-wire-templates.svg`);
   if (kind === 'offsets') download(new Blob([offsetsCSV()], { type: 'text/csv' }), `${slug()}-offsets.csv`);
+  if ((kind === 'foamstl' || kind === 'foamtpl') && !foamPlan?.needed) return toast('Plan the foam on the Rules tab first');
+  if (kind === 'foamstl') download(new Blob([toBinarySTL(foamPlan.foamSoup, 'foam', sc)], { type: 'model/stl' }), `${slug()}-foam-block-${stlUnits}.stl`);
+  if (kind === 'foamtpl') download(new Blob([foamTemplatesSVG()], { type: 'image/svg+xml' }), `${slug()}-foam-templates.svg`);
   toast('Downloaded');
 }
 function stationsList() {
@@ -1025,4 +1110,4 @@ loadInitial();
 buildParamPanel();
 $('#designName').value = designName;
 update();
-window.__canoe = { get params() { return params; }, get built() { return built; }, get design() { return design; }, setParams, exports: { hotwireSVG, templatesSVG, offsetsCSV } };
+window.__canoe = { get params() { return params; }, get built() { return built; }, get design() { return design; }, setParams, exports: { hotwireSVG, templatesSVG, offsetsCSV, foamTemplatesSVG }, get foamPlan() { return foamPlan; } };

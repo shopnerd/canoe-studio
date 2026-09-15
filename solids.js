@@ -1,6 +1,6 @@
 // solids.js — Manifold (WASM) booleans: watertight hull, concrete shell, mold blocks, STL/ZIP writers.
 // Isomorphic: used by worker.js in the browser and by test/core-test.mjs in Node.
-import { rowsToSoup, innerRows, analyze, massProps, clipRows, sliceLoops } from './hull.js';
+import { rowsToSoup, innerRows, analyze, massProps, clipRows, sliceLoops, WATER_PCF } from './hull.js';
 
 export function createSolidKit(wasm) {
   const { Manifold, Mesh } = wasm;
@@ -169,7 +169,59 @@ export function createSolidKit(wasm) {
     return { lam, n, shape: o.shape, lengthIn: lenFull * s, joints, segments, modelVolIn3 };
   }
 
-  return { fromSoup, toSoup, build, buildPrint };
+  // ── Flotation foam plan (2027 §6.6): how far from each tip the foam bulkhead has to sit ──
+  // Swamped, the concrete sinks by (γc − γw)·V_shell + extras; foam lifts (γw − γf) per volume. Foam fills the end
+  // void up to `cap` below the sheer and is closed by a concrete cap (top slab under the sheer + bulkhead face),
+  // which adds its own sinking weight. Bisection on d ∈ [1, zone] for the smallest d whose foam lift covers
+  // the sinking force × (1 + margin). Both ends are the same (the hull is fore-aft symmetric); volumes are per end.
+  function buildFoam(design, { zone = 36 } = {}) {
+    const { p, rows, hullRows, sheerZ } = design;
+    const H = p.height, cap = p.foamCap;
+    const gw = WATER_PCF / 1728, gc = p.concreteDensity / 1728, gf = p.foamPcf / 1728, mg = 1 + p.foamMargin / 100;
+    const garbage = [];
+    const keep = m => (garbage.push(m), m);
+    const hull = keep(fromSoup(rowsToSoup(hullRows)));
+    const inner = keep(fromSoup(rowsToSoup(innerRows(hullRows, p.wall, H + 4))));
+    const shell = keep(hull.subtract(inner));
+    const voidAll = keep(hull.intersect(inner));
+    const lowered = keep(fromSoup(rowsToSoup(clipRows(rows, x => sheerZ(x) - cap))));
+    const voidLow = keep(voidAll.intersect(lowered));                  // where foam may go: cap thickness under the sheer
+    const tip = hull.boundingBox().max[0];
+    const big = Math.max(p.width, H) * 4;
+    const fromX = x => keep(Manifold.cube([zone + 20, big, big]).translate([x, -big / 2, -big / 4]));
+    const sinking = shell.volume() * (gc - gw) + p.extraWeight;        // lb, > 0 means it sinks when swamped
+    const at = d => {
+      const foam = keep(voidLow.intersect(fromX(tip - d)));
+      const caps = keep(keep(voidAll.intersect(fromX(tip - d - cap))).subtract(foam));
+      const vf = foam.volume(), vc = caps.volume();
+      const lift = 2 * vf * (gw - gf), capSink = 2 * vc * (gc - gw);
+      return { d, foam, caps, vf, vc, lift, sinkTotal: sinking + capSink, ok: lift >= (sinking + capSink) * mg };
+    };
+    let best;
+    if (sinking * mg <= 0) best = null;                                 // floats swamped on its own
+    else {
+      let lo = 1, hi = zone, rHi = at(hi), rLo = at(lo);
+      if (rLo.ok) best = rLo;
+      else if (!rHi.ok) best = rHi;                                     // even the full zone is not enough
+      else {
+        while (hi - lo > 0.25) { const mid = (lo + hi) / 2, r = at(mid); if (r.ok) { hi = mid; rHi = r; } else lo = mid; }
+        best = rHi;
+      }
+    }
+    const out = { needed: best !== null, sinkingLb: sinking, zone, tip, cap };
+    if (best) {
+      Object.assign(out, {
+        d: best.d, fits: best.ok && best.d <= zone + 1e-9,
+        foamIn3: best.vf, foamLb: best.vf * gf, capIn3: best.vc, capLb: best.vc * gc,   // per end
+        liftLb: best.lift, sinkTotalLb: best.sinkTotal, marginPct: best.sinkTotal > 0 ? (best.lift / best.sinkTotal - 1) * 100 : Infinity,
+        foamTopZ: sheerZ(tip - best.d) - cap, foamSoup: toSoup(best.foam), capSoup: toSoup(best.caps),
+      });
+    }
+    for (const m of garbage) try { m.delete(); } catch { /* freed */ }
+    return out;
+  }
+
+  return { fromSoup, toSoup, build, buildPrint, buildFoam };
 }
 
 export function sheerRing(hullRows) {
