@@ -1,6 +1,6 @@
 // worker.js — Manifold booleans + hydrostatics off the main thread.
 import Module from './vendor/manifold.js';
-import { buildDesign } from './hull.js';
+import { buildDesign, resistanceCurve } from './hull.js';
 import { createSolidKit, sheerRing, analyze } from './solids.js';
 
 let K = null;
@@ -20,6 +20,7 @@ onmessage = async e => {
       const solids = K.build(design, { mold: m.mold });
       const t1 = performance.now();
       const analysis = analyze(design.p, solids.hullSoup, solids.shellSoup, sheerRing(design.hullRows), { endVoidIn3: solids.endVoidIn3 });
+      try { analysis.resist = analysis.loaded.sunk ? null : resistanceCurve(design.p, solids.hullSoup, analysis.loaded); } catch (e) { analysis.resist = null; analysis.resistError = e.message; }
       const t2 = performance.now();
       // every soup comes from its own toSoup() call, so all buffers are distinct
       const transfer = [solids.hullSoup, solids.shellSoup, solids.printHullSoup, solids.printShellSoup, ...solids.blocks.map(b => b.soup)].map(s => s.buffer);

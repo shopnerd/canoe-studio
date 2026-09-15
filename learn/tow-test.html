@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Model Tow Test</title>
+<meta name="description" content="How to tow-test a 1:4 scale concrete canoe model in a pool, scale the drag to full size with the ITTC method, check Canoe Studio's prediction, and calibrate paddler power.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22%3E%3Cpath d=%22M2 16 C 12 30, 28 30, 38 16 L 38 14 C 26 19, 14 19, 2 14 Z%22 fill=%22%231f2328%22/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="learn.css">
+</head>
+<body>
+<header class="bar">
+  <a class="brand" href="./"><svg viewBox="0 0 40 16" aria-hidden="true"><path d="M1 4 C 10 15, 30 15, 39 4 L 39 3 C 28 7, 12 7, 1 3 Z"/></svg>Canoe Studio <small>Learn</small></a>
+  <nav aria-label="Guides"><a href="start.html">Using the app</a><a href="rules-2027.html">2027 rules</a><a href="finals-2025.html">2025 Finals</a><a href="mix.html">Mix notes</a><a href="strength-test.html">Strength test</a><a href="tow-test.html" aria-current="page">Tow test</a><a href="post-tensioning.html">Post-tensioning</a><a href="season-report.html">Season report</a></nav>
+  <a class="app" href="../">Open the app →</a>
+</header>
+<main class="wide">
+  <div class="kicker">Guide · Hydrodynamics · physical test</div>
+  <h1>Model tow test</h1>
+  <p class="lede">Pull a scale model of the hull through a pool at scaled speeds, measure the drag, and turn it into full-scale numbers. It’s the only real check on Canoe Studio’s drag prediction, it costs about a weekend and $60 of electronics, and it makes a strong piece for the display.</p>
+
+  <div class="panel verdict">
+    <b class="v">What you get out of it</b>
+    <ul style="margin:0">
+      <li>A <b>measured drag curve</b> for the hull, to compare against the app’s prediction (Analysis › Speed, drag &amp; race time).</li>
+      <li>The hull’s <b>form factor k</b>, which the app currently guesses at 0.08.</li>
+      <li>Evidence for the Design Narrative: “predicted vs. measured” is exactly what judges reward.</li>
+    </ul>
+  </div>
+
+  <h2>How scaling works</h2>
+  <p>A model at scale λ (1:4 means λ = 4) makes the <b>same wave pattern</b> as the full canoe when it moves at the full speed divided by √λ. That’s <b>Froude scaling</b>, and it’s why a 1:4 model is towed at half speed. Wave drag then scales with λ³.</p>
+  <p>Friction doesn’t scale that way. The model’s water flow is at a much lower Reynolds number, so its friction is proportionally higher. The standard fix (ITTC) is to split the measured drag into friction, which you calculate for each size, and the rest, which you scale:</p>
+  <div class="eq">C<sub>T,model</sub> = R / (½ ρ V² S) &nbsp;→&nbsp; C<sub>R</sub> = C<sub>T,model</sub> − (1+k)·C<sub>F</sub>(Re<sub>model</sub>) &nbsp;→&nbsp; C<sub>T,full</sub> = (1+k)·C<sub>F</sub>(Re<sub>full</sub>) + C<sub>R</sub></div>
+  <p>C<sub>F</sub> is the ITTC-1957 friction line, 0.075 / (log₁₀Re − 2)². The calculator below does all of this for you.</p>
+
+  <h2>What to expect for the default hull</h2>
+  <p>The default 210 in design at race load (514 lb, two paddlers) comes from Canoe Studio. Rerun the numbers for your final hull.</p>
+  <div class="table-wrap"><table class="wide">
+    <thead><tr><th>Full-scale speed</th><th class="r">1:4 model speed</th><th class="r">Model Reynolds no.</th><th class="r">Expected model drag</th><th class="r">of which waves</th></tr></thead>
+    <tbody>
+      <tr><td>3 mph</td><td class="r">0.67 m/s · 1.5 mph</td><td class="r">0.9 × 10⁶</td><td class="r">≈ 22 g</td><td class="r">1 g</td></tr>
+      <tr><td>4 mph</td><td class="r">0.89 m/s · 2.0 mph</td><td class="r">1.2 × 10⁶</td><td class="r">≈ 39 g</td><td class="r">3 g</td></tr>
+      <tr><td>5 mph</td><td class="r">1.12 m/s · 2.5 mph</td><td class="r">1.4 × 10⁶</td><td class="r">≈ 65 g</td><td class="r">12 g</td></tr>
+      <tr><td>6 mph</td><td class="r">1.34 m/s · 3.0 mph</td><td class="r">1.7 × 10⁶</td><td class="r">≈ 115 g</td><td class="r">40 g</td></tr>
+      <tr><td>7 mph</td><td class="r">1.56 m/s · 3.5 mph</td><td class="r">2.0 × 10⁶</td><td class="r">≈ 190 g</td><td class="r">90 g</td></tr>
+    </tbody>
+  </table></div>
+  <p>The model: <b>52.5 in long</b>, 7.5 in beam, floating 1.36 in deep, ballasted to <b>8.0 lb (3.6 kg)</b> total. Forces are small, grams not pounds, so the rig needs a sensitive load cell and very little friction.</p>
+
+  <h2>Build the model</h2>
+  <ol class="steps">
+    <li><div><b>Get the shape.</b> Export the hull STL from Canoe Studio and scale it by 0.25, or print the section templates at 25% and hot-wire foam between them. The model isn’t the competition mold, so 3D printing or CNC is fine here. Only the mold rule restricts machines.</div></li>
+    <li><div><b>Make it smooth and stiff.</b> Seal foam with a skim coat and paint, and sand smooth. Surface roughness adds friction the full canoe won’t have.</div></li>
+    <li><div><b>Add a turbulence trip.</b> At these Reynolds numbers the flow over a model can stay partly laminar and read too low. Glue a thin trip wire (about 0.5 mm) or a row of small studs around the hull about 5% of the length back from the bow.</div></li>
+    <li><div><b>Ballast and mark the waterline.</b> Add weight low and centered until the model weighs 3.6 kg for race load (or your case), and check it floats level at the scaled draft. Mark the waterline with tape.</div></li>
+  </ol>
+
+  <h2>Build the rig</h2>
+  <div class="cols">
+    <div class="col"><div class="k">Recommended</div><h3>Motor spool + load cell</h3><ul><li>A 12 V gear motor with a PWM speed controller winding line onto a spool at the far end of the pool.</li><li>A <b>500 g–1 kg load cell</b> with an HX711 board and an Arduino or ESP32 logging force, placed inline at the model’s tow point.</li><li>Speed from the spool RPM, or from phone video past tape marks on the pool edge.</li><li>Parts ≈ $40–60.</li></ul></div>
+    <div class="col"><div class="k">No electronics</div><h3>Falling weight</h3><ul><li>Line from the bow runs over a low-friction pulley (a bike wheel works) and down to a hanging cup of washers.</li><li>A constant weight gives a steady speed. Time the model over a marked 3–5 m once it stops accelerating.</li><li>Needs a drop height as long as the timed run, like a balcony or diving platform. Calibrate the pulley friction with no model attached.</li></ul></div>
+    <div class="col"><div class="k">Either way</div><h3>Keep it honest</h3><ul><li>Tow from the bow <b>at the waterline height</b>, so the line doesn’t lift or push the bow down.</li><li>A light guide line or rod keeps the model straight without adding drag.</li><li>Pool depth ≥ 1 m and a clear lane. Shallow water and walls add drag.</li><li>Wait for the water to settle between runs.</li></ul></div>
+  </div>
+
+  <h2>Run it</h2>
+  <ol class="steps">
+    <li><div><b>Calibrate</b> the load cell with known weights (coins or kitchen-scale standards) at 20, 50, 100 and 200 g.</div></li>
+    <li><div><b>Pick 6–8 model speeds</b> covering full-scale 3–7 mph (0.67–1.56 m/s at 1:4).</div></li>
+    <li><div><b>Three runs per speed.</b> Use only the steady middle of each run, and average the force over it.</div></li>
+    <li><div><b>Record the water temperature.</b> It changes viscosity and friction.</div></li>
+    <li><div><b>Enter the data below.</b> Compare the full-scale drag with the app’s table at the same speeds.</div></li>
+  </ol>
+
+  <h2 id="calculator">Calculator: model data → full scale</h2>
+  <div class="panel calc">
+    <div class="calc-grid">
+      <label>Scale λ<input id="t_lam" type="number" step="0.5" value="4"></label>
+      <label>Full-scale waterline length (in)<input id="t_lwl" type="number" step="0.1" value="202.6"></label>
+      <label>Full-scale wetted surface (ft²)<input id="t_s" type="number" step="0.01" value="31.14"></label>
+      <label>Form factor k<input id="t_k" type="number" step="0.01" value="0.08"></label>
+      <label>Pool water temperature (°C)<input id="t_temp" type="number" step="0.5" value="26"></label>
+    </div>
+    <p class="hint-s">Full-scale length and wetted surface are on the Analysis tab (Hydrostatics, race load). Model values are derived from λ. <b>The first five rows are made-up example data.</b> Replace them with your measurements (your entries are saved in this browser).</p>
+    <div class="table-wrap"><table class="wide calc-table" id="towTable">
+      <thead><tr><th class="r">Model speed (m/s)</th><th class="r">Measured drag (g)</th><th class="r">App predicted, full scale (lb)</th><th class="r">Full-scale speed</th><th class="r">C<sub>R</sub> ×10³</th><th class="r">Full-scale drag</th><th class="r">vs. app</th></tr></thead>
+      <tbody></tbody>
+    </table></div>
+  </div>
+
+  <h2 id="power">Calibrate paddler power</h2>
+  <p>The app’s race-time estimate depends on the <i>effective power per paddler</i>, which is a placeholder until you measure it. Time a straight, flying-start run over a measured distance in calm water at a steady race pace. Read the drag at that speed from the app, and this turns it into power.</p>
+  <div class="panel calc">
+    <div class="calc-grid">
+      <label>Paddlers in the boat<input id="p_n" type="number" step="1" value="2"></label>
+      <label>Distance (m)<input id="p_d" type="number" step="1" value="100"></label>
+      <label>Time (s)<input id="p_t" type="number" step="0.1" value="38"></label>
+      <label>App total drag at that speed (lb)<input id="p_r" type="number" step="0.1" value="12"></label>
+    </div>
+    <p class="result" id="p_out"></p>
+  </div>
+  <p class="hint-s">Enter the result in <i>Analysis inputs › Effective power per paddler</i>. Do it at the same load (number of paddlers) you race with, and repeat on a second day. Wind and current matter more than you’d think.</p>
+
+  <div class="foot">Scaling: ITTC-1957 friction line with a form factor, the standard Froude extrapolation (ITTC-78 principle, simplified). Model drag estimates come from Canoe Studio’s Michell thin-ship wave-drag solver, which reproduces Michell’s own 1898 worked example to within about 4%. Treat them as a planning range, not a pass/fail target.</div>
+
+  <div class="next"><a href="strength-test.html"><small>Previous</small>← Thin-section strength test</a><a class="fwd" href="post-tensioning.html"><small>Next</small>Post-tensioning →</a></div>
+</main>
+
+<style>
+.calc { padding: 18px 20px; }
+.calc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px 16px; }
+.calc-grid label { display: flex; flex-direction: column; gap: 4px; font-size: 14px; font-weight: 500; }
+.calc input { font: 400 15px var(--mono); padding: 6px 8px; border: 1px solid var(--rule-2); border-radius: 5px; background: #fff; color: var(--ink); width: 100%; }
+.calc input:focus { outline: none; border-color: var(--accent); }
+.calc-table td { padding: 5px 8px; vertical-align: middle; }
+.calc-table td input { text-align: right; }
+.calc-table td.out { font-family: var(--mono); font-variant-numeric: tabular-nums; text-align: right; color: var(--ink-2); white-space: nowrap; }
+.hint-s { font-size: 14px; color: var(--muted); }
+.result { font: 500 17px var(--sans); margin: 14px 0 0; }
+.result b { font-family: var(--mono); color: var(--water); }
+</style>
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const cf = Re => 0.075 / (Math.log10(Re) - 2) ** 2;
+  const nuAt = T => 1.79e-6 / (1 + 0.0337 * T + 0.000221 * T * T);
+  const rhoAt = T => 1000 * (1 - (T + 288.9414) * (T - 3.9863) ** 2 / (508929.2 * (T + 68.12963)));
+  const tb = document.querySelector('#towTable tbody');
+  const ex = [[0.67, 23], [0.89, 40], [1.12, 66], [1.34, 118], [1.56, 195], ['', ''], ['', ''], ['', '']];
+  const KEY = 'canoe-tow-test-v1';
+  let saved = null; try { saved = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) { /* storage blocked */ }
+  ex.forEach((r, i) => {
+    const s = saved?.rows?.[i];
+    tb.insertAdjacentHTML('beforeend', `<tr><td><input id="tv${i}" type="number" step="0.01" value="${s ? s[0] : r[0]}" aria-label="Model speed row ${i + 1}"></td><td><input id="tf${i}" type="number" step="1" value="${s ? s[1] : r[1]}" aria-label="Measured drag row ${i + 1}"></td><td><input id="ta${i}" type="number" step="0.1" value="${s ? s[2] : ''}" aria-label="App predicted drag row ${i + 1}"></td><td class="out" id="to_v${i}"></td><td class="out" id="to_c${i}"></td><td class="out" id="to_r${i}"></td><td class="out" id="to_d${i}"></td></tr>`);
+  });
+  if (saved?.head) for (const k in saved.head) if ($(k)) $(k).value = saved.head[k];
+  function tow() {
+    const lam = +$('t_lam').value, Ls = +$('t_lwl').value * 0.0254, Ss = +$('t_s').value * 0.092903, k = +$('t_k').value, T = +$('t_temp').value;
+    const Lm = Ls / lam, Sm = Ss / lam / lam, nuM = nuAt(T), rhoM = rhoAt(T), nuS = 1.004e-6, rhoS = 998.2;
+    const rows = [];
+    for (let i = 0; i < ex.length; i++) {
+      const V = parseFloat($('tv' + i).value), g = parseFloat($('tf' + i).value), app = parseFloat($('ta' + i).value);
+      rows.push([$('tv' + i).value, $('tf' + i).value, $('ta' + i).value]);
+      const set = (id, t) => { $(id + i).textContent = t; };
+      if (!(V > 0 && g > 0 && lam > 0 && Ls > 0 && Ss > 0)) { ['to_v', 'to_c', 'to_r', 'to_d'].forEach(id => set(id, '')); continue; }
+      const Rm = g / 1000 * 9.80665;
+      const CT = Rm / (0.5 * rhoM * V * V * Sm);
+      const CR = CT - (1 + k) * cf(V * Lm / nuM);
+      const Vs = V * Math.sqrt(lam);
+      const CTs = (1 + k) * cf(Vs * Ls / nuS) + CR;
+      const Rs = CTs * 0.5 * rhoS * Vs * Vs * Ss / 4.44822;
+      set('to_v', `${(Vs / 0.44704).toFixed(2)} mph`);
+      set('to_c', (CR * 1000).toFixed(2));
+      set('to_r', `${Rs.toFixed(2)} lb`);
+      set('to_d', app > 0 ? `${Rs > app ? '+' : ''}${(100 * (Rs - app) / app).toFixed(0)}%` : '');
+    }
+    const head = Object.fromEntries(['t_lam', 't_lwl', 't_s', 't_k', 't_temp'].map(id => [id, $(id).value]));
+    try { localStorage.setItem(KEY, JSON.stringify({ head, rows })); } catch (e) { /* storage blocked */ }
+  }
+  function power() {
+    const n = +$('p_n').value, d = +$('p_d').value, t = +$('p_t').value, r = +$('p_r').value;
+    if (!(n > 0 && d > 0 && t > 0 && r > 0)) { $('p_out').textContent = ''; return; }
+    const V = d / t, P = r * 4.44822 * V / n;
+    $('p_out').innerHTML = `Speed <b>${(V / 0.44704).toFixed(2)} mph</b> → effective power <b>${P.toFixed(0)} W</b> per paddler`;
+  }
+  document.querySelectorAll('.calc input').forEach(inp => inp.addEventListener('input', () => { tow(); power(); }));
+  tow(); power();
+})();
+</script>
+
+</body>
+</html>

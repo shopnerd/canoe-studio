@@ -47,14 +47,16 @@ export const PARAMS = [
   { group: 'Analysis inputs', key: 'crewCG', label: 'Paddler CG above keel', def: 14, min: 0, max: 36, step: 0.5, unit: 'in', help: 'Kneeling ≈ 12–16 in, sitting on a seat ≈ 18–22 in.' },
   { group: 'Analysis inputs', key: 'extraWeight', label: 'Other weight (reinf., paint)', def: 10, min: 0, max: 200, step: 1, unit: 'lb' },
   { group: 'Analysis inputs', key: 'foam', label: 'Flotation foam', def: 0, min: 0, max: 20, step: 0.1, unit: 'ft³', help: 'Encased in the end bulkheads. 2027 rules: only within 3 ft of the bow and stern tips.' },
-  { group: 'Analysis inputs', key: 'speed', label: 'Race speed', def: 5, min: 1, max: 9, step: 0.1, unit: 'mph' },
+  { group: 'Analysis inputs', key: 'speed', label: 'Speed for drag readout', def: 5, min: 1, max: 9, step: 0.1, unit: 'mph' },
+  { group: 'Analysis inputs', key: 'paddlerPower', label: 'Effective power per paddler', def: 70, min: 20, max: 250, step: 5, unit: 'W', help: 'Power that actually pushes the boat (after paddle losses). Placeholder: calibrate it from a timed 200 m run on the Tow test guide.' },
+  { group: 'Analysis inputs', key: 'formFactor', label: 'Form factor k', def: 0.08, min: 0, max: 0.4, step: 0.01, unit: '', help: 'Extra viscous drag from the hull shape, as a fraction of flat-plate friction. ~0.05–0.12 for slender hulls; a model tow test measures it.' },
 
   { group: 'Rules & structure', key: 'paddlerInset', label: 'End paddler from tip', def: 42, min: 12, max: 90, step: 1, unit: 'in', help: 'Where the bow and stern paddlers kneel. Middle paddlers are spaced evenly between them.' },
   { group: 'Rules & structure', key: 'letterLength', label: 'Lettering length needed', def: 72, min: 12, max: 180, step: 1, unit: 'in', help: 'Run of gunwale the school + canoe names need on each side (5 in letters).' },
   { group: 'Rules & structure', key: 'reinfThk', label: 'Reinforcement thickness', def: 0.1, min: 0, max: 0.75, step: 0.01, unit: 'in', help: 'Total of all primary reinforcement layers in the wall.' },
   { group: 'Rules & structure', key: 'poa', label: 'Mesh percent open area', def: 50, min: 0, max: 100, step: 1, unit: '%' },
   { group: 'Rules & structure', key: 'fc', label: 'Compressive strength f′c', def: 1500, min: 200, max: 8000, step: 50, unit: 'psi', help: 'From your cylinder tests. Placeholder until you have data.' },
-  { group: 'Rules & structure', key: 'ft', label: 'Composite tensile strength', def: 300, min: 20, max: 3000, step: 10, unit: 'psi', help: 'From your composite flexural / split-tensile tests. Placeholder until you have data.' },
+  { group: 'Rules & structure', key: 'ft', label: 'Composite tensile strength', def: 300, min: 20, max: 3000, step: 10, unit: 'psi', help: 'Use the average first-crack stress from thin-strip bending tests (Learn › Strength test). Placeholder until you have data.' },
   { group: 'Rules & structure', key: 'fs', label: 'Factor of safety', def: 2, min: 1, max: 5, step: 0.1, unit: '' },
   { group: 'Rules & structure', key: 'kneePatch', label: 'Knee contact patch (square)', def: 4, min: 1, max: 12, step: 0.5, unit: 'in', help: 'Side of the loaded area for the punching-shear check.' },
 ];
@@ -606,7 +608,7 @@ export function analyze(p, hullSoup, shellSoup, sheerRing, extra = {}) {
     }
     return {
       label, weight, sunk: sol.sunk, draft: T, waterline: sol.d, displacementIn3: V,
-      freeboard: minSheer - sol.d, LWL: wp.LWL, BWL: wp.BWL, Awp: wp.area, wetted: sm.wet,
+      freeboard: minSheer - sol.d, LWL: wp.LWL, BWL: wp.BWL, xAft: wp.xAft, xFwd: wp.xFwd, Awp: wp.area, wetted: sm.wet,
       LCB: sm.B[0], LCF: wp.centroidX, KB, BMt, BMl, KG, GMt: KB + BMt - KG, GMl: KB + BMl - KG,
       Cb: V / (wp.LWL * wp.BWL * T), Cwp: wp.area / (wp.LWL * wp.BWL), Cm: Am / (wp.BWL * T), Cp: V / (Am * wp.LWL),
       Am, xAm: xm, sac,
@@ -744,5 +746,107 @@ export function longitudinalStrength(p, hullSoup, shellSoup, nPaddlers, xs, ext)
     stress: { top: sigTop, bottom: sigBot, tension, compression, tensionFS: tension * p.fs, compressionFS: compression * p.fs,
       dcrTension: tension * p.fs / p.ft, dcrCompression: compression * p.fs / p.fc },
     punching: { d, b0, vu, vuFS: vu * p.fs, phiVc, dcr: vu * p.fs / phiVc },
+  };
+}
+
+// ─── Hydrodynamics: Michell thin-ship wave resistance (J.H. Michell 1898) ──────────────────
+// Rw = (4 ρ g² / π U²) ∫₁^∞ (I² + J²) λ² / √(λ² − 1) dλ,  I + iJ = ∬ f_x e^(−k₀λ² z) e^(i k₀ λ x) dx dz,
+// f(x, z) = half-breadth, z = depth below the waterline, k₀ = g/U². Integrated by parts in x (f = 0 at
+// the ends), exact exponential weights for a piecewise-linear f, and λ = sec θ to remove the singularity.
+// Checked against Michell's own worked example (test/core-test.mjs). All inputs SI.
+export function michellRw(off, U, rho = 998.2, g = 9.81, nTheta = 1200) {
+  const { nx, nz, hx, hz, x0, f } = off; // f[(nx+1)*(nz+1)], f[i*(nz+1)+j] at x0+i*hx, depth j*hz
+  const k0 = g / (U * U);
+  const lamMax = Math.max(1.02, 2 * Math.PI / (k0 * hx));
+  const thMax = Math.acos(1 / lamMax);
+  const n = nTheta % 2 ? nTheta + 1 : nTheta, dth = thMax / n;
+  const re = new Float64Array(nz + 1), im = new Float64Array(nz + 1), wz = new Float64Array(nz + 1);
+  let total = 0;
+  for (let q = 0; q <= n; q++) {
+    const th = q * dth;
+    if (th >= Math.PI / 2) continue;
+    const sec = 1 / Math.cos(th), k = k0 * sec, kap = k0 * sec * sec;
+    // x weights: ∫ hat_i(x) e^{ikx} dx = e^{ikx_i} h sinc²(kh/2)
+    const s = k * hx / 2, sinc2 = s < 1e-8 ? 1 : (Math.sin(s) / s) ** 2;
+    // z weights: ∫ hat_j(z) e^{−κz} dz, written to avoid overflow
+    const a = kap * hz;
+    if (a < 1e-7) { for (let j = 0; j <= nz; j++) wz[j] = (j === 0 || j === nz) ? hz / 2 : hz; }
+    else {
+      const e1 = Math.exp(-a);
+      wz[0] = (a - 1 + e1) / (kap * kap * hz);
+      for (let j = 1; j < nz; j++) wz[j] = Math.exp(-kap * (j - 1) * hz) * (1 - e1) * (1 - e1) / (kap * kap * hz);
+      wz[nz] = Math.exp(-kap * (nz - 1) * hz) * (1 - (1 + a) * e1) / (kap * kap * hz);
+    }
+    re.fill(0); im.fill(0);
+    for (let i = 1; i < nx; i++) {
+      const ph = k * (x0 + i * hx), c = Math.cos(ph), sn = Math.sin(ph), base = i * (nz + 1);
+      for (let j = 0; j <= nz; j++) { const v = f[base + j]; if (v) { re[j] += v * c; im[j] += v * sn; } }
+    }
+    let Sr = 0, Si = 0;
+    for (let j = 0; j <= nz; j++) { Sr += re[j] * wz[j]; Si += im[j] * wz[j]; }
+    Sr *= hx * sinc2; Si *= hx * sinc2;
+    const F = k * k * (Sr * Sr + Si * Si) * sec * sec * sec; // (I²+J²) λ²/√(λ²−1) dλ/dθ = … sec³θ
+    total += F * (q === 0 || q === n ? 1 : q % 2 ? 4 : 2);
+  }
+  total *= dth / 3;
+  return 4 * rho * g * g / (Math.PI * U * U) * total;
+}
+
+// Half-breadth offsets of the submerged hull, from a closed soup (inches) → SI grid for michellRw.
+export function hullOffsets(soup, waterZ, xAft, xFwd, nx = 96, nz = 16) {
+  const IN = 0.0254;
+  const ext = soupExtents(soup);
+  const keel = ext.lo[2], T = waterZ - keel;
+  const pad = (xFwd - xAft) * 0.01;
+  const xa = xAft - pad, xb = xFwd + pad, hx = (xb - xa) / nx, hz = T / nz;
+  const f = new Float64Array((nx + 1) * (nz + 1));
+  for (let i = 1; i < nx; i++) {
+    const loops = sliceLoops(soup, xa + i * hx);
+    for (let j = 0; j <= nz; j++) {
+      const z = waterZ - j * hz;
+      let best = 0;
+      for (const lp of loops) for (let s = 0; s < lp.length; s++) {
+        const p = lp[s], r = lp[(s + 1) % lp.length];
+        if ((p[1] - z) * (r[1] - z) <= 0 && p[1] !== r[1]) {
+          const y = Math.abs(p[0] + (r[0] - p[0]) * (z - p[1]) / (r[1] - p[1]));
+          if (y > best) best = y;
+        }
+      }
+      f[i * (nz + 1) + j] = best * IN;
+    }
+  }
+  return { nx, nz, hx: hx * IN, hz: hz * IN, x0: xa * IN, f, T: T * IN, L: (xb - xa) * IN };
+}
+
+// ITTC-1957 friction line
+export const ittcCf = Re => 0.075 / (Math.log10(Re) - 2) ** 2;
+
+// Resistance curve and race-speed prediction at a given loaded waterline.
+export function resistanceCurve(p, hullSoup, loaded) {
+  const rho = 998.2, g = 9.81, nu = 1.004e-6, LB = 4.44822;
+  const off = hullOffsets(hullSoup, loaded.waterline, loaded.xAft, loaded.xFwd);
+  const S = loaded.wetted * 0.0254 * 0.0254, Lwl = loaded.LWL * 0.0254;
+  const pts = [];
+  for (let mph = 1; mph <= 9.0001; mph += 0.5) {
+    const U = mph * 0.44704;
+    const Rf = 0.5 * rho * U * U * S * ittcCf(U * Lwl / nu) * (1 + p.formFactor);
+    const Rw = michellRw(off, U, rho, g, 600);
+    pts.push({ mph, Fn: U / Math.sqrt(g * Lwl), Rf: Rf / LB, Rw: Rw / LB, R: (Rf + Rw) / LB, P: (Rf + Rw) * U });
+  }
+  // speed where total resistance power = crew effective power (bisection on the tabulated curve)
+  const speedFor = watts => {
+    for (let k = 1; k < pts.length; k++) if (pts[k].P >= watts) {
+      const a = pts[k - 1], b = pts[k], t = (watts - a.P) / (b.P - a.P);
+      return a.mph + (b.mph - a.mph) * t;
+    }
+    return null;
+  };
+  const crewN = Math.max(1, p.crew);
+  const vRace = speedFor(crewN * p.paddlerPower);
+  const at = mph => { const k = pts.findIndex(q => q.mph >= mph - 1e-9); return k < 0 ? null : pts[k]; };
+  return {
+    pts, off: { nx: off.nx, nz: off.nz, L: off.L, T: off.T },
+    crew: crewN, raceMph: vRace, time200: vRace ? 200 / (vRace * 0.44704) : null,
+    atSpeed: at(Math.round(p.speed * 2) / 2),
   };
 }

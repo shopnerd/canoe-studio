@@ -32,3 +32,10 @@ Headless check: `node test/core-test.mjs` (builds the default design, prints hyd
 - 6.2.1 means the script's printed mold blocks can't be the competition mold. Hand hot-wire along CNC-cut templates is allowed ("jigs or templates"); a CNC hot-wire machine is not. Build & export → "Hot-wire templates" gives a profile at every block joint.
 - Beam model: level trim, buoyancy per strip scaled to close equilibrium, moment residual removed linearly. The RFP wants hand-calculated section properties in the Calculation Package — the app is a cross-check.
 - Not checked: mix design proportions (c/cm, C595 share, aggregate %), which live in the RFP's Excel templates.
+
+## Hydrodynamics (added 2026-09-15)
+- `hull.js › michellRw` — Michell (1898) thin-ship wave resistance on a half-breadth grid (integration by parts in x, exact exponential weights, λ = sec θ, Simpson). `hullOffsets` samples the loaded hull; `resistanceCurve` adds ITTC-57 friction × (1+k) and solves race speed from crew effective power.
+- Validation: `node test/michell-check.mjs` reproduces Michell's worked example (Tuck 1989, ANZIAM J. B 30:365): 901 lbf seawater vs. Michell's ≈933–940 (about 4% low, within his stated rounding); an independent brute-force integration agrees to 0.1%. `test/resistance-conv.mjs` shows the 96×16 grid / 600-angle setting within ~1% of a fine grid.
+- Limits: level trim, calm deep water, no turns, thin-ship assumption. Best for comparing designs. `paddlerPower` and `formFactor` are placeholders until a timed run and a tow test calibrate them.
+- `test/tow-plan.mjs` prints model-scale planning numbers (speeds, Reynolds, expected drag in grams) for the tow-test guide.
+- Learn pages: `tow-test.html` (Froude/ITTC scaling calculator + paddler-power calibration) and `strength-test.html` (thin-strip third-point bending and punching with a yoke on a pull-down bridge tester, calculators).

@@ -8,6 +8,8 @@ NAV = [
     ('rules-2027.html', '2027 rules'),
     ('finals-2025.html', '2025 Finals'),
     ('mix.html', 'Mix notes'),
+    ('strength-test.html', 'Strength test'),
+    ('tow-test.html', 'Tow test'),
     ('post-tensioning.html', 'Post-tensioning'),
     ('season-report.html', 'Season report'),
 ]

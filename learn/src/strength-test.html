@@ -1,0 +1,139 @@
+<!-- title: Thin-Section Strength Test | description: How to test hull-thickness concrete chips in bending and punching with a converted bridge tester: specimen prep, the loading fixture, formulas, calculators, and how the results feed Canoe Studio and the 2027 report. -->
+<main class="wide">
+  <div class="kicker">Guide · Materials · physical test</div>
+  <h1>Thin-section strength test</h1>
+  <p class="lede">Break thin strips and plates cast exactly like the hull, same thickness, same layers and mesh, on the bridge tester, converted to push on a concrete specimen instead of a model bridge. It gives the two numbers the structure check depends on, plus the broken flexural sample the display requires.</p>
+
+  <div class="panel verdict">
+    <b class="v">Why these two tests</b>
+    <ul style="margin:0">
+      <li><b>Bending (flexural) strip:</b> the hull wall bends between ribs, under water pressure and when the canoe flexes. This gives the <b>first-crack stress</b> (use it as <i>Composite tensile strength</i> in the app) and the <b>peak stress</b> (the “composite flexural strength” the Design Narrative reports, with its test age).</li>
+      <li><b>Punching plate:</b> a paddler’s knee on a thin floor. This checks the app’s punching-shear estimate against a real break.</li>
+      <li>One broken flexural specimen goes on the display table (RFP §7.2.1).</li>
+    </ul>
+  </div>
+
+  <h2>Make the specimens</h2>
+  <ol class="steps">
+    <li><div><b>Cast flat panels, not cylinders.</b> Use the same mold release, the same concrete layers and thicknesses, and mesh placed exactly as in the hull (e.g. ⅛ in / mesh / ¼ in / mesh / ⅛ in). Place and trowel them the way you’ll do the canoe. The point is to test the <i>composite</i>, including your workmanship.</div></li>
+    <li><div><b>Cure them like the hull,</b> same method and time. Mark each panel with mix, layup, cast date and which face is the finish (troweled) side.</div></li>
+    <li><div><b>Cut specimens</b> with a wet saw (dust control) once they’re strong enough, or cast them to size in divided forms:
+      <ul><li><b>Bending strips:</b> about 2 in wide × 12 in long. ASTM C947, the standard for thin-section glass-fiber concrete up to 1 in thick, uses third-point loading. Borrow the standard and match its specimen and span details if you’ll cite it.</li>
+      <li><b>Punching plates:</b> about 9 × 9 in.</li></ul></div></li>
+    <li><div><b>Make enough.</b> Five strips per mix and layup per test age (7, 14 and 28 days is a good set), plus three plates. Strength scatters, and one break isn’t data.</div></li>
+    <li><div><b>Measure before breaking.</b> Width and thickness with calipers at the middle and both load points. Thickness is squared in the formula, so a 10% thickness error is a 20% strength error.</div></li>
+  </ol>
+
+  <h2>Convert the bridge tester</h2>
+  <p>A bridge tester pulls a loading block <b>down</b>. For bending, the specimen sits on two supports and something has to press <b>down on top of it</b>. A <b>yoke</b> does that: a top bar with two loading rollers rests on the specimen, and two threaded rods run down past the sides of the specimen to a bottom bar that the tester pulls. The supports sit on a rigid frame bolted to the tester, with a gap so the rods pass freely.</p>
+  <figure class="chart">
+    <svg viewBox="0 0 770 330" role="img" aria-labelledby="yT yD">
+      <title id="yT">Yoke fixture for third-point bending in a pull-down tester</title>
+      <desc id="yD">The specimen rests on two support rollers on a rigid frame. A top loading bar with two rollers at the third points presses down, connected by two side rods to a bottom crossbar pulled downward by the tester.</desc>
+      <rect x="120" y="250" width="460" height="16" fill="#cbc6bb"/>
+      <text class="lbl" x="600" y="262">rigid frame, bolted</text><text class="lbl" x="600" y="279">to the tester</text>
+      <rect x="165" y="190" width="14" height="60" fill="#7b818a"/><rect x="521" y="190" width="14" height="60" fill="#7b818a"/>
+      <circle cx="172" cy="182" r="8" fill="#1f2328"/><circle cx="528" cy="182" r="8" fill="#1f2328"/>
+      <rect x="140" y="158" width="420" height="16" fill="#9a9993" stroke="#1f2328" stroke-width="1.2"/>
+      <text class="lbl" x="120" y="171" text-anchor="end">specimen</text>
+      <circle cx="291" cy="150" r="7" fill="#d9480f"/><circle cx="409" cy="150" r="7" fill="#d9480f"/>
+      <rect x="250" y="102" width="200" height="16" fill="#1f2328"/>
+      <line x1="291" y1="118" x2="291" y2="143" stroke="#1f2328" stroke-width="3"/><line x1="409" y1="118" x2="409" y2="143" stroke="#1f2328" stroke-width="3"/>
+      <text class="lbl" x="350" y="94" text-anchor="middle">top loading bar + 2 rollers at the third points</text>
+      <line x1="244" y1="110" x2="244" y2="306" stroke="#d9480f" stroke-width="4"/><line x1="456" y1="110" x2="456" y2="306" stroke="#d9480f" stroke-width="4"/>
+      <rect x="232" y="306" width="236" height="12" fill="#1f2328"/>
+      <line x1="350" y1="318" x2="350" y2="328" stroke="#1f2328" stroke-width="3"/>
+      <text class="lbl" x="476" y="322">bottom bar → tester pulls down</text>
+      <text class="lbl" x="92" y="215" text-anchor="end">support rollers</text>
+      <text class="lbl" x="92" y="232" text-anchor="end">(span L)</text>
+      <text class="lbl" x="600" y="200">side rods, in front of</text><text class="lbl" x="600" y="217">and behind the frame</text>
+      <line x1="172" y1="60" x2="528" y2="60" stroke="#7b818a"/><line x1="172" y1="55" x2="172" y2="65" stroke="#7b818a"/><line x1="528" y1="55" x2="528" y2="65" stroke="#7b818a"/><line x1="291" y1="55" x2="291" y2="65" stroke="#7b818a"/><line x1="409" y1="55" x2="409" y2="65" stroke="#7b818a"/>
+      <text x="231" y="50" text-anchor="middle">L/3</text><text x="350" y="50" text-anchor="middle">L/3</text><text x="469" y="50" text-anchor="middle">L/3</text>
+    </svg>
+    <figcaption>Side view. The specimen is a hull-thickness strip with its finish face down (in tension), so you test the surface that matters. Rollers are ⅜–½ in steel rod or dowel, free to roll so they don’t clamp the specimen. For the punching test, replace the top bar with a single square “knee” block and set the plate on a rigid ring or four edge supports.</figcaption>
+  </figure>
+  <ul>
+    <li><b>Capacity and resolution.</b> A 2 in strip at hull thickness breaks at roughly <b>50–150 lb</b>, and a punching plate at a few hundred. The tester’s load reading must resolve about <b>1 lb</b>, and the yoke’s own weight has to be subtracted or tared.</li>
+    <li><b>Rate.</b> Load smoothly, with no jerks, so the specimen fails in roughly one to three minutes. A crank or winch that jumps in steps gives low, scattered results.</li>
+    <li><b>Deflection</b> is worth recording: a dial indicator under midspan, or phone video beside a ruler. Mesh-reinforced composites carry load well after first crack, and that toughness is a story worth telling.</li>
+    <li><b>Safety.</b> Safety glasses and a clear shield. Thin concrete fails suddenly and throws chips.</li>
+  </ul>
+
+  <h2>Record for every break</h2>
+  <div class="table-wrap"><table class="wide">
+    <thead><tr><th>Field</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr><td>Specimen ID, mix, layup, cast date, test date (age)</td><td>The report must state the testing age; comparisons only work at equal age</td></tr>
+      <tr><td>Width, thickness at the break (in)</td><td>Thickness is squared in the stress formula</td></tr>
+      <tr><td>Span and loading type (third-point / center)</td><td>Different formulas</td></tr>
+      <tr><td>Load at first crack (lb)</td><td>→ first-crack stress: the conservative design tensile value</td></tr>
+      <tr><td>Peak load (lb)</td><td>→ composite flexural strength (modulus of rupture)</td></tr>
+      <tr><td>Which face was in tension; where it broke</td><td>A break outside the middle third or at a thin spot is a specimen problem, not a material result</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2 id="calculator">Calculator</h2>
+  <div class="panel calc">
+    <h3 style="margin-top:0">Bending strip</h3>
+    <div class="calc-grid">
+      <label>Load type<select id="b_type"><option value="third">Third-point (4-point)</option><option value="center">Center point (3-point)</option></select></label>
+      <label>Span L (in)<input id="b_L" type="number" step="0.1" value="10"></label>
+      <label>Width b (in)<input id="b_b" type="number" step="0.01" value="2"></label>
+      <label>Thickness d (in)<input id="b_d" type="number" step="0.01" value="0.5"></label>
+      <label>First-crack load (lb)<input id="b_p1" type="number" step="0.1" value="30"></label>
+      <label>Peak load (lb)<input id="b_p2" type="number" step="0.1" value="60"></label>
+    </div>
+    <p class="result" id="b_out"></p>
+
+    <h3>Punching plate</h3>
+    <div class="calc-grid">
+      <label>Loaded patch (square side, in)<input id="u_a" type="number" step="0.1" value="2"></label>
+      <label>Plate thickness t (in)<input id="u_t" type="number" step="0.01" value="0.5"></label>
+      <label>Failure load (lb)<input id="u_p" type="number" step="1" value="250"></label>
+      <label>Cylinder f′c (psi)<input id="u_fc" type="number" step="50" value="1500"></label>
+    </div>
+    <p class="result" id="u_out"></p>
+  </div>
+
+  <h2>Feed the results back</h2>
+  <ul>
+    <li><b>Canoe Studio › Rules &amp; structure:</b> set <i>Composite tensile strength</i> to the <b>average first-crack stress</b>, a conservative choice since the hull shouldn’t be designed to crack. Set <i>f′c</i> from cylinder breaks. The Rules tab’s bending and punching checks update immediately.</li>
+    <li><b>Design Narrative / infographic:</b> report composite flexural strength (peak) <b>with its age</b>, e.g. “1,520 psi at 7 days” as Virginia Tech did in 2025.</li>
+    <li><b>Season report:</b> predicted vs. measured strength, section 3.</li>
+    <li><b>Display:</b> keep the best broken strip, labeled with its load, stress and age.</li>
+  </ul>
+
+  <div class="foot">Formulas: third-point σ = P·L / (b·d²); center-point σ = 3·P·L / (2·b·d²); punching v = P / (b₀·d) with d ≈ t/2 and b₀ = 4(a + d), compared to ACI 318 two-way v<sub>c</sub> = 4√f′c (psi, λ = 1). These are simple-beam estimates for comparison. The competition rules don’t prescribe the flexural method, so state the method you used in the report.</div>
+
+  <div class="next"><a href="mix.html"><small>Previous</small>← Mix &amp; troweling notes</a><a class="fwd" href="tow-test.html"><small>Next</small>Model tow test →</a></div>
+</main>
+
+<style>
+.calc { padding: 18px 20px; }
+.calc h3 { font-size: 20px; margin-top: 26px; }
+.calc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px 16px; margin-top: 10px; }
+.calc-grid label { display: flex; flex-direction: column; gap: 4px; font-size: 14px; font-weight: 500; }
+.calc input, .calc select { font: 400 15px var(--mono); padding: 6px 8px; border: 1px solid var(--rule-2); border-radius: 5px; background: #fff; color: var(--ink); width: 100%; }
+.calc input:focus, .calc select:focus { outline: none; border-color: var(--accent); }
+.result { font: 500 16.5px/1.6 var(--sans); margin: 14px 0 0; }
+.result b { font-family: var(--mono); color: var(--water); }
+</style>
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  function bend() {
+    const L = +$('b_L').value, b = +$('b_b').value, d = +$('b_d').value, p1 = +$('b_p1').value, p2 = +$('b_p2').value;
+    if (!(L > 0 && b > 0 && d > 0)) { $('b_out').textContent = ''; return; }
+    const f = $('b_type').value === 'third' ? P => P * L / (b * d * d) : P => 3 * P * L / (2 * b * d * d);
+    $('b_out').innerHTML = `First-crack stress <b>${p1 > 0 ? f(p1).toFixed(0) : '—'} psi</b> · composite flexural strength (peak) <b>${p2 > 0 ? f(p2).toFixed(0) : '—'} psi</b>`;
+  }
+  function punch() {
+    const a = +$('u_a').value, t = +$('u_t').value, P = +$('u_p').value, fc = +$('u_fc').value;
+    if (!(a > 0 && t > 0 && P > 0)) { $('u_out').textContent = ''; return; }
+    const d = t / 2, b0 = 4 * (a + d), v = P / (b0 * d), vc = fc > 0 ? 4 * Math.sqrt(fc) : null;
+    $('u_out').innerHTML = `Punching shear stress at failure <b>${v.toFixed(0)} psi</b>` + (vc ? ` · ACI estimate v<sub>c</sub> = 4√f′c = <b>${vc.toFixed(0)} psi</b> · measured / estimate <b>${(v / vc).toFixed(2)}</b>` : '');
+  }
+  document.querySelectorAll('.calc input, .calc select').forEach(i => i.addEventListener('input', () => { bend(); punch(); }));
+  bend(); punch();
+})();
+</script>

@@ -1,0 +1,12 @@
+import Module from '../vendor/manifold.js';
+import { buildDesign, DEFAULTS, analyze, resistanceCurve } from '../hull.js';
+import { createSolidKit, sheerRing } from '../solids.js';
+const wasm = await Module(); wasm.setup();
+const K = createSolidKit(wasm);
+const d = buildDesign(DEFAULTS), r = K.build(d, { mold: false });
+const A = analyze(d.p, r.hullSoup, r.shellSoup, sheerRing(d.hullRows), { endVoidIn3: r.endVoidIn3 });
+let t = performance.now();
+const C = resistanceCurve(d.p, r.hullSoup, A.loaded);
+console.log('ms', (performance.now() - t).toFixed(0), 'LWL m', C.off.L.toFixed(2), 'T m', C.off.T.toFixed(3));
+for (const q of C.pts.filter(q => Number.isInteger(q.mph) || q.mph % 1 === 0.5)) console.log(q.mph.toFixed(2), 'mph Fn', q.Fn.toFixed(3), 'Rf', q.Rf.toFixed(2), 'Rw', q.Rw.toFixed(2), 'R', q.R.toFixed(2), 'lb  P', q.P.toFixed(0), 'W');
+console.log('crew', C.crew, 'race mph', C.raceMph?.toFixed(2), '200 m s', C.time200?.toFixed(1));

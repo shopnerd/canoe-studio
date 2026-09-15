@@ -510,6 +510,7 @@ function metricList(a) {
     hullWeight: a.hullWeight, draft: a.loaded.draft, freeboard: a.loaded.freeboard, GMt: a.loaded.GMt,
     hullSpeed: a.speed.hullSpeedMph, drag: a.speed.dragLb, concrete: ft3(a.shellVolumeIn3), wetted: ft2(a.loaded.wetted),
     maxGZ: a.maxGZ[1], Cp: a.loaded.Cp, LWL: a.loaded.LWL,
+    time200: a.resist?.time200 ?? undefined, dragAt: a.resist?.atSpeed?.R ?? undefined,
   };
 }
 function delta(key, value, better, digits = 2) {
@@ -585,12 +586,27 @@ function renderAnalysis() {
   h += `<h3>Sectional area curve</h3><div class="chart">${sacChart(L)}</div>
   <p class="hint">Submerged area of each cross section along the waterline, stern (left) to bow (right). A smooth, full curve is easier to push; C<sub>p</sub> ${fmt(L.Cp, 3)}.</p>`;
 
-  h += `<h3>Speed &amp; drag</h3><table class="kv">
-    <tr><td>Theoretical hull speed (1.34 √LWL)</td><td>${fmt(a.speed.hullSpeedMph, 2)} mph</td><td>${fmt(a.speed.hullSpeedMph / 1.15078, 2)} kn</td></tr>
-    <tr><td>Froude number at ${fmt(p.speed, 1)} mph</td><td>${fmt(a.speed.Fn, 3)}</td><td></td></tr>
-    <tr><td>Skin-friction drag at ${fmt(p.speed, 1)} mph</td><td>${fmt(a.speed.dragLb, 2)} lb</td><td>${fmt(a.speed.dragN, 1)} N</td></tr>
-  </table>
-  <p class="hint">ITTC-1957 friction line on the wetted surface. Wave-making drag is not included — it grows fast near hull speed, so treat this as a floor for comparing designs.</p>`;
+  const rs = a.resist;
+  h += `<h3>Speed, drag &amp; race time</h3>`;
+  if (!rs) h += `<p class="hint">Resistance couldn’t be computed for this design${a.resistError ? ' (' + a.resistError + ')' : ''}.</p>`;
+  else {
+    const at = rs.atSpeed;
+    h += `<div class="cards">
+      ${card(`200 m straight, ${rs.crew} paddler${rs.crew > 1 ? 's' : ''}`, rs.time200 ? fmt(rs.time200, 1) : '—', 's', 'time200', 'down', 1)}
+      ${card('Race speed', rs.raceMph ? fmt(rs.raceMph, 2) : '> 9', 'mph', null, null)}
+      ${card(`Total drag at ${fmt(at?.mph ?? p.speed, 1)} mph`, at ? fmt(at.R, 2) : '—', 'lb', 'dragAt', 'down', 2)}
+    </div>
+    <div class="chart">${dragChart(rs)}</div>
+    <table class="kv" style="margin-top:8px">
+      <tr><th>Speed</th><th>Friction</th><th>Waves</th></tr>
+      ${rs.pts.filter(q => Number.isInteger(q.mph) && q.mph >= 3 && q.mph <= 8).map(q => `<tr><td>${q.mph} mph <span style="color:var(--muted)">· Fn ${fmt(q.Fn, 2)}</span></td><td>${fmt(q.Rf, 2)} lb</td><td>${fmt(q.Rw, 2)} lb</td></tr>`).join('')}
+    </table>
+    <table class="kv" style="margin-top:8px">
+      <tr><td>Theoretical hull speed (1.34 √LWL)</td><td>${fmt(a.speed.hullSpeedMph, 2)} mph</td><td>${fmt(a.speed.hullSpeedMph / 1.15078, 2)} kn</td></tr>
+      <tr><td>Crew effective power</td><td>${rs.crew} × ${fmt(p.paddlerPower, 0)} W</td><td></td></tr>
+    </table>
+    <p class="hint">Wave drag from Michell’s thin-ship integral on the loaded hull, friction from the ITTC-1957 line × (1 + k), k = ${fmt(p.formFactor, 2)}. Straight-line, level trim, calm water, no turns. Most reliable for <b>comparing designs</b> (pin a baseline). The paddler power is a placeholder: calibrate it with a timed run, and check the drag with a model tow test (<a href="learn/tow-test.html" target="_blank" rel="noopener">guide</a>).</p>`;
+  }
 
   $('#analysis').innerHTML = h;
 }
@@ -636,9 +652,24 @@ function sacChart(L) {
   return `<svg viewBox="0 0 ${W} ${Hc}" role="img" aria-label="Sectional area curve">${h}</svg>`;
 }
 
+function dragChart(rs) {
+  const W = 408, Hc = 180, pad = { l: 36, r: 12, t: 12, b: 24 };
+  const pts = rs.pts, maxR = Math.max(...pts.map(q => q.R), ...(baseline?.dragPts ? baseline.dragPts.map(q => q[1]) : [0]));
+  const yt = niceTicks(0, maxR);
+  const f = chartFrame([1, 9], [0, yt[yt.length - 1]], W, Hc, pad, t => t, t => t, [1, 3, 5, 7, 9], yt);
+  const line = (key, cls, style = '') => `<path class="line ${cls}" style="${style}" d="M${pts.map(q => f.X(q.mph).toFixed(1) + ',' + f.Y(q[key]).toFixed(1)).join('L')}"/>`;
+  let h = f.h;
+  if (baseline?.dragPts) h += `<path class="line base" d="M${baseline.dragPts.map(q => f.X(q[0]).toFixed(1) + ',' + f.Y(q[1]).toFixed(1)).join('L')}"/>`;
+  h += line('Rf', '', 'stroke:#7b818a;stroke-width:1.5;stroke-dasharray:5 3') + line('Rw', '', 'stroke:#1f6fb2;stroke-width:1.5') + line('R', '');
+  if (rs.raceMph) h += `<line class="mark" x1="${f.X(rs.raceMph)}" x2="${f.X(rs.raceMph)}" y1="${pad.t}" y2="${Hc - pad.b}"/><text class="mark-t" x="${f.X(rs.raceMph) + 3}" y="${pad.t + 9}">race speed</text>`;
+  h += `<text x="${pad.l + 4}" y="${pad.t + 10}">lb</text><text x="${W - pad.r}" y="${Hc - 4}" text-anchor="end">mph</text>`;
+  h += `<text x="${pad.l + 4}" y="${pad.t + 26}" style="fill:#1f2328">— total</text><text x="${pad.l + 60}" y="${pad.t + 26}" style="fill:#1f6fb2">— waves</text><text x="${pad.l + 122}" y="${pad.t + 26}" style="fill:#7b818a">- - friction</text>`;
+  return `<svg viewBox="0 0 ${W} ${Hc}" role="img" aria-label="Resistance versus speed">${h}</svg>`;
+}
+
 $('#btnBaseline').addEventListener('click', () => {
   if (!built) return;
-  baseline = { ...metricList(built.analysis), gz: built.analysis.gz, sac: built.analysis.loaded.sac, name: designName };
+  baseline = { ...metricList(built.analysis), gz: built.analysis.gz, sac: built.analysis.loaded.sac, dragPts: built.analysis.resist?.pts.map(q => [q.mph, q.R]), name: designName };
   persist(); renderAnalysis(); toast('Pinned — cards now show the difference from this design');
 });
 
